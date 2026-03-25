@@ -31,7 +31,7 @@ Example request:  GET [/api/users?$filter=id eq 1&$select=id,username](http://lo
 ```typescript
 import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { odataQuery } from 'odata-v4-typeorm';
+import { odataQuery } from 'odata-v4-typeorm-improved';
 import { Repository } from 'typeorm';
 
 import { UserEntity } from '../entities/user.entity';
@@ -115,7 +115,7 @@ export class AppModule implements NestModule {
 
 ```typescript
 import express from 'express';
-import { odataQuery } from 'odata-v4-typeorm';
+import { odataQuery } from 'odata-v4-typeorm-improved';
 import { getRepository } from 'typeorm';
 import { User } from '../entities/user';
 
@@ -132,7 +132,7 @@ app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 ```typescript
 import express from 'express';
-import { executeQuery } from 'odata-v4-typeorm';
+import { executeQuery } from 'odata-v4-typeorm-improved';
 import { getRepository } from 'typeorm';
 import { User } from '../entities/user';
 
@@ -156,7 +156,7 @@ app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 ```typescript
 import express from 'express';
-import { executeQuery } from 'odata-v4-typeorm';
+import { executeQuery } from 'odata-v4-typeorm-improved';
 import { getRepository } from 'typeorm';
 import { User } from '../entities/user';
 
@@ -181,7 +181,7 @@ app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 ## createFilter
 
 ```javascript
-import { createFilter } from 'odata-v4-typeorm'
+import { createFilter } from 'odata-v4-typeorm-improved'
 
 //example request:  GET /api/Users?$filter=Id eq 42
 app.get("/api/Users", (req: Request, res: Response) => {
@@ -200,7 +200,7 @@ Advanced TypeScript example available [here](https://raw.githubusercontent.com/j
 
 ## Usage ES5
 ```javascript
-var createFilter = require('odata-v4-typeorm').createFilter;
+var createFilter = require('odata-v4-typeorm-improved').createFilter;
 
 app.get("/api/Users", function(req, res) {
     var filter = createFilter(req.query.$filter);
