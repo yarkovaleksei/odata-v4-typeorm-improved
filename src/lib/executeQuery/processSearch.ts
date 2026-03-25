@@ -22,11 +22,6 @@ const textColumnTypes = [
   'tinytext',
   'mediumtext',
   'longtext',
-  'clob',
-  'uuid',
-  'enum',
-  'simple-array',
-  'simple-json',
   // SQLite column.type is String
   'string',
 ];
