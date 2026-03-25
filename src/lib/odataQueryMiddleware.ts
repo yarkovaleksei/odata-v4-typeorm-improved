@@ -39,7 +39,7 @@ export function odataQuery<T extends ObjectLiteral = ObjectLiteral>(
 
       res.status(500).json({
         message: 'Internal server error.',
-        error: { message: e.message },
+        error: { message: (e as Error).message },
       });
     }
 

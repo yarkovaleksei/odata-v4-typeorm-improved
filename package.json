@@ -1,6 +1,6 @@
 {
   "name": "odata-v4-typeorm-improved",
-  "version": "0.2.2",
+  "version": "1.0.0-alpha.0",
   "description": "OData to TYPEORM query compiler",
   "main": "build/lib/index.js",
   "typings": "build/lib/index",
@@ -41,18 +41,19 @@
     "odata-v4-sql": "^0.1.2"
   },
   "devDependencies": {
-    "@types/config": "^0.0.38",
+    "@types/config": "^4.4.0",
     "@types/express": "^5.0.6",
-    "@types/jest": "^26.0.23",
-    "@types/node": "^15.12.4",
-    "@types/pg": "^8.6.0",
-    "config": "^1.21.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.5.0",
+    "@types/pg": "^8.20.0",
+    "config": "^4.4.1",
     "install-peers-cli": "^2.2.0",
-    "jest": "^27.0.5",
+    "jest": "^30.3.0",
     "odata-v4-server": "0.2.13",
-    "pg": "^6.1.0",
-    "ts-jest": "^27.0.3",
-    "typescript": "^4.3.4"
+    "pg": "^8.20.0",
+    "ts-jest": "^29.4.6",
+    "typeorm": "^0.3.28",
+    "typescript": "^6.0.2"
   },
   "peerDependencies": {
     "typeorm": "^0.3.28"

@@ -6,7 +6,6 @@ export function createConnection(
   migrations: any[] = [],
   dbConfig: any,
 ) {
-  const entitiesArray = [].concat(entities);
   const migrationsArray = ['migrations/*.js'].concat(migrations);
 
   return new Promise((resolve, reject) => {
@@ -17,7 +16,7 @@ export function createConnection(
         autoSchemaSync: true,
         synchronize: true,
         migrationsRun: true,
-        entities: entitiesArray,
+        entities,
         namingStrategy: new SnakeCaseNamingStrategy(),
 
         ...dbConfig,

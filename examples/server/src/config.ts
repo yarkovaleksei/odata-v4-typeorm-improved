@@ -12,7 +12,7 @@ const config = convict({
   http: {
     ip: {
       doc: 'The IP address to bind.',
-      format: 'ipaddress',
+      format: String,
       default: '127.0.0.1',
       env: 'http_ip',
       arg: 'http_ip',

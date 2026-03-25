@@ -5,8 +5,11 @@
     "module": "commonjs",
     "declaration": true,
     "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
     "outDir": "build",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "rootDir": ".",
+    "types": ["@types/jest", "@types/node"]
   },
   "include": ["src/**/*"],
   "exclude": ["build", "node_modules", "examples", "src/**/*.(test|spec).ts"]

@@ -27,7 +27,7 @@ export default (async () => {
 
     // Posts
     const postsRepository = getRepository(Post);
-    app.get('/api/posts/([\$])metadata', (res, req) => {
+    app.get('/api/posts/*$metadata', (res, req) => {
       const metadata = getConnection()
         .getMetadata(Post)
         .ownColumns.map((column) => column.propertyName);
@@ -55,7 +55,7 @@ export default (async () => {
 
     // Authors
     const authorsRepository = getRepository(Author);
-    app.get('/api/authors/([\$])metadata', (res, req) => {
+    app.get('/api/authors/*$&metadata', (res, req) => {
       const metadata = getConnection()
         .getMetadata(Author)
         .ownColumns.map((column) => column.propertyName);
@@ -65,7 +65,7 @@ export default (async () => {
 
     // Users
     const usersRepository = getRepository(User);
-    app.get('/api/users/([\$])metadata', (res, req) => {
+    app.get('/api/users/*$&metadata', (res, req) => {
       const metadata = getConnection()
         .getMetadata(User)
         .ownColumns.map((column) => column.propertyName);

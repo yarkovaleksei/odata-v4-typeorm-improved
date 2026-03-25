@@ -4,6 +4,12 @@ import { SQLLiteral, SQLLang, Visitor } from 'odata-v4-sql/lib/visitor';
 
 import type { SqlOptions } from './types';
 
+interface Context extends Record<string, any> {
+  target: string;
+  identifier: string | Context;
+  literal?: string;
+}
+
 export class TypeOrmVisitor extends Visitor {
   public includes: TypeOrmVisitor[] = [];
   public alias = '';
@@ -40,19 +46,19 @@ export class TypeOrmVisitor extends Visitor {
     return sql;
   }
 
-  protected VisitQueryOptions(node: Token, context: any) {
+  protected VisitQueryOptions(node: Token, context: Context) {
     node.value.options
       .sort(
         (a: Token, b: Token) =>
           this.queryOptionsSort.indexOf(a.type) -
           this.queryOptionsSort.indexOf(b.type),
       )
-      .forEach((option) => this.Visit(option, context));
+      .forEach((option: Token) => this.Visit(option, context));
   }
 
-  protected VisitExpand(node: Token, context: any) {
-    node.value.items.forEach((item) => {
-      let expandPath = item.value.path.raw + item.position;
+  protected VisitExpand(node: Token, context: Context) {
+    node.value.items.forEach((item: Token) => {
+      let expandPath = `${item.value.path.raw}${item.position}`;
       let visitor = this.includes.filter(
         (v) => v.navigationProperty == expandPath,
       )[0];
@@ -70,7 +76,7 @@ export class TypeOrmVisitor extends Visitor {
     });
   }
 
-  protected VisitSelectItem(node: Token, context: any) {
+  protected VisitSelectItem(node: Token, context: Context) {
     if (this.select !== '' && !this.select.trim().endsWith(',')) {
       this.select += ', ';
     }
@@ -95,10 +101,10 @@ export class TypeOrmVisitor extends Visitor {
 
     this.select +=
       (this.select && !this.select.trim().endsWith(',') ? ',' : '') +
-      this.getIdentifier(item, context.identifier);
+      this.getIdentifier(item, context.identifier as Context);
   }
 
-  protected VisitPropertyPathExpression(node: Token, context: any) {
+  protected VisitPropertyPathExpression(node: Token, context: Context) {
     if (context.target === 'where' && node.value.current) {
       // if we're in a filtering context and get to this point, we're dealing with a `relation/member`
       // We need to ensure that this relation is loaded into a Visitor
@@ -135,30 +141,34 @@ export class TypeOrmVisitor extends Visitor {
     }
   }
 
-  protected VisitODataIdentifier(node: Token, context: any) {
+  protected VisitODataIdentifier(node: Token, context: Context) {
     if (context.identifier && context.identifier.endsWith('.')) {
+      // @ts-ignore
       this[context.target] += '.';
     }
 
     if (node.value.name === 'NULL') {
+      // @ts-ignore
       this[context.target] += node.value.name;
     } else {
       const ident = this.getIdentifier(node.value.name, context);
 
+      // @ts-ignore
       this[context.target] += ident;
     }
 
     context.identifier = node.value.name;
   }
 
-  private getIdentifier(originalIdentifier: string, context: any) {
+  private getIdentifier(originalIdentifier: string, context: Context) {
     let alias = '';
 
     if (!context || !context.identifier || !context.identifier.endsWith('.')) {
       alias = `${this.alias}.`;
     } else {
+      // @ts-ignore
       this[context.target] = this[context.target].replace(
-        new RegExp(`${this.alias}.` + context.identifier, 'g'),
+        new RegExp(`${this.alias}.${context.identifier}`, 'g'),
         context.identifier,
       );
     }
@@ -166,7 +176,7 @@ export class TypeOrmVisitor extends Visitor {
     return `${alias}${originalIdentifier}`;
   }
 
-  protected VisitEqualsExpression(node: Token, context: any) {
+  protected VisitEqualsExpression(node: Token, context: Context) {
     this.Visit(node.value.left, context);
 
     this.where += ' = ';
@@ -190,7 +200,7 @@ export class TypeOrmVisitor extends Visitor {
     }
   }
 
-  protected VisitNotEqualsExpression(node: Token, context: any) {
+  protected VisitNotEqualsExpression(node: Token, context: Context) {
     this.Visit(node.value.left, context);
 
     this.where += ' <> ';
@@ -214,7 +224,7 @@ export class TypeOrmVisitor extends Visitor {
     }
   }
 
-  protected VisitLiteral(node: Token, context: any) {
+  protected VisitLiteral(node: Token, context: Context) {
     if (this.options.useParameters) {
       let name = `p${this.parameterSeed++}`;
       let value = Literal.convert(node.value, node.raw);
@@ -230,7 +240,7 @@ export class TypeOrmVisitor extends Visitor {
       this.where += context.literal = SQLLiteral.convert(node.value, node.raw);
   }
 
-  protected VisitMethodCallExpression(node: Token, context: any) {
+  protected VisitMethodCallExpression(node: Token, context: Context) {
     var method = node.value.method;
     var params = node.value.parameters || [];
 

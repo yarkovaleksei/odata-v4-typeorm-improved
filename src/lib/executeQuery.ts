@@ -11,8 +11,8 @@ import { parseQueryParams } from './parseQueryParams';
 import type { QueryParams } from './types';
 import type { TypeOrmVisitor } from './visitor';
 
-const mapToObject = (aMap) => {
-  const obj = {};
+const mapToObject = (aMap: Map<string, any>): Record<string, any> => {
+  const obj: Record<string, any> = {};
 
   if (aMap) {
     aMap.forEach((v, k) => {
@@ -24,19 +24,13 @@ const mapToObject = (aMap) => {
 };
 
 const queryToOdataString = (query: QueryParams): string => {
-  let result = '';
-
-  for (let key in query) {
-    if (key.startsWith('$')) {
-      if (result !== '') {
-        result += '&';
-      }
-
-      result += `${key}=${query[key]}`;
-    }
-  }
-
-  return result;
+  return Object.entries(query)
+    .filter(([key, value]) => key.startsWith('$') && value != null)
+    .map(
+      ([key, value]) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(value)}`,
+    )
+    .join('&');
 };
 
 const processIncludes = <T extends ObjectLiteral = ObjectLiteral>(
@@ -47,11 +41,6 @@ const processIncludes = <T extends ObjectLiteral = ObjectLiteral>(
 ): SelectQueryBuilder<T> => {
   if (odataQuery.includes && odataQuery.includes.length > 0) {
     odataQuery.includes.forEach((item) => {
-      const relation_metadata = queryBuilder.connection.getMetadata(
-        parent_metadata.relations.find(
-          (x) => x.propertyPath === item.navigationProperty,
-        ).type,
-      );
       const join = item.select === '*' ? 'leftJoinAndSelect' : 'leftJoin';
 
       if (join === 'leftJoin') {
@@ -90,12 +79,22 @@ const processIncludes = <T extends ObjectLiteral = ObjectLiteral>(
       }
 
       if (item.includes && item.includes.length > 0) {
-        processIncludes(
-          queryBuilder,
-          { includes: item.includes },
-          item.alias,
-          relation_metadata,
+        const target = parent_metadata.relations.find(
+          (x) => x.propertyPath === item.navigationProperty,
         );
+
+        if (target) {
+          const relation_metadata = queryBuilder.connection.getMetadata(
+            target.type,
+          );
+
+          processIncludes(
+            queryBuilder,
+            { includes: item.includes },
+            item.alias,
+            relation_metadata,
+          );
+        }
       }
     });
   }
@@ -116,13 +115,14 @@ const executeQueryByQueryBuilder = async <
     ...(options ?? {}),
   };
   const alias =
-    localOptions.alias || inputQueryBuilder.expressionMap.mainAlias.name;
+    localOptions.alias ||
+    (inputQueryBuilder.expressionMap.mainAlias?.name ?? '');
   const odataString = queryToOdataString(parsedQueryWithoutSearch);
   const odataQuery = createQuery(odataString, { alias });
   const metadata = inputQueryBuilder.connection.getMetadata(alias);
 
   let queryBuilder = inputQueryBuilder;
-  let root_select = [];
+  let root_select: string[] = [];
 
   // Unlike the relations which are done via leftJoin[AndSelect](), we must explicitly add root
   // entity fields to the selection if it hasn't been narrowed down by the user.
