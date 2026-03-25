@@ -1,6 +1,6 @@
 {
-  "name": "@the_blitzmann/odata-v4-typeorm",
-  "version": "0.0.2",
+  "name": "odata-v4-typeorm-improved",
+  "version": "0.1.0",
   "description": "OData to TYPEORM query compiler",
   "main": "build/lib/index.js",
   "typings": "build/lib/index",
@@ -8,17 +8,18 @@
     "test": "test"
   },
   "scripts": {
+    "postinstall": "install-peers",
     "build": "tsc",
-    "pretest": "npm run build",
+    "pretest": "yarn build",
     "test": "jest",
-    "pretdd": "npm run build",
-    "release": "npm run build && npm publish",
-    "release:beta": "npm run build && npm publish --tag beta",
-    "server": "cd ./examples/server && npm run start"
+    "pretdd": "yarn build",
+    "release": "yarn build && npm publish",
+    "release:beta": "yarn build && npm publish --tag beta",
+    "server": "cd ./examples/server && yarn && yarn start"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/blitzmann/odata-v4-typeorm.git"
+    "url": "git+https://github.com/yarkovaleksei/odata-v4-typeorm.git"
   },
   "keywords": [
     "typeorm",
@@ -30,26 +31,31 @@
     "sql",
     "node"
   ],
-  "author": "blitzmann",
+  "author": "yarkovaleksei",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/blitzmann/odata-v4-typeorm/issues"
+    "url": "https://github.com/yarkovaleksei/odata-v4-typeorm/issues"
   },
-  "homepage": "https://github.com/blitzmann/odata-v4-typeorm#readme",
+  "homepage": "https://github.com/yarkovaleksei/odata-v4-typeorm#readme",
   "dependencies": {
     "odata-v4-parser": "^0.1.29",
     "odata-v4-sql": "^0.1.2"
   },
   "devDependencies": {
     "@types/config": "^0.0.38",
+    "@types/express": "^5.0.6",
     "@types/jest": "^26.0.23",
     "@types/node": "^15.12.4",
     "@types/pg": "^8.6.0",
     "config": "^1.21.0",
+    "install-peers-cli": "^2.2.0",
     "jest": "^27.0.5",
-    "odata-v4-server": "rc",
+    "odata-v4-server": "0.2.13",
     "pg": "^6.1.0",
     "ts-jest": "^27.0.3",
     "typescript": "^4.3.4"
+  },
+  "peerDependencies": {
+    "typeorm": "^0.3.28"
   }
 }

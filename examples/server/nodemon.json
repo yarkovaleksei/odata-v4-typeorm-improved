@@ -1,6 +1,6 @@
 {
-    "watch": "../../**/*.ts",
-    "execMap": {
-      "ts": "ts-node"
-    }
+  "watch": "../../**/*.ts",
+  "execMap": {
+    "ts": "ts-node"
   }
+}

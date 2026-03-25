@@ -1,9 +1,12 @@
-import {createConnection as createTypeOrmConnection} from 'typeorm';
-import {SnakeCaseNamingStrategy} from './snakeCaseNamingStrategy';
+import { createConnection as createTypeOrmConnection } from 'typeorm';
+import { SnakeCaseNamingStrategy } from './snakeCaseNamingStrategy';
 
-export function createConnection(entities: any[] = [], migrations: any[] = [], dbConfig: any) {
-  const entitiesArray = []
-    .concat(entities);
+export function createConnection(
+  entities: any[] = [],
+  migrations: any[] = [],
+  dbConfig: any,
+) {
+  const entitiesArray = [].concat(entities);
   const migrationsArray = ['migrations/*.js'].concat(migrations);
 
   return new Promise((resolve, reject) => {
@@ -19,12 +22,13 @@ export function createConnection(entities: any[] = [], migrations: any[] = [], d
 
         ...dbConfig,
       };
-      createTypeOrmConnection(conf).then((connection) => {
-        resolve(connection);
-      }).catch((e) => {
-        reject(e);
-      });
-
+      createTypeOrmConnection(conf)
+        .then((connection) => {
+          resolve(connection);
+        })
+        .catch((e) => {
+          reject(e);
+        });
     } catch (e) {
       return reject(e);
     }

@@ -8,13 +8,6 @@
     "outDir": "build",
     "skipLibCheck": true
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "build",
-    "node_modules",
-    "examples",
-    "src/**/*.test.ts"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["build", "node_modules", "examples", "src/**/*.(test|spec).ts"]
 }
