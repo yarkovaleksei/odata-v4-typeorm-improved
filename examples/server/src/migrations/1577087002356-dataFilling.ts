@@ -1,7 +1,6 @@
-import {MigrationInterface, QueryRunner} from 'typeorm';
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class DataFilling1577087002356 implements MigrationInterface {
-
   async up(queryRunner: QueryRunner): Promise<any> {
     await queryRunner.query(`INSERT INTO "users" (id,username) 
                                   VALUES 
@@ -12,7 +11,7 @@ export class DataFilling1577087002356 implements MigrationInterface {
                                     (5,'a_salinas_emmanuel'),
                                     (6,'user_1'),
                                     (7,'user_2'),
-                                    (8,'user_3')`)
+                                    (8,'user_3')`);
     await queryRunner.query(`INSERT INTO "authors" (id,name,user_id) 
                                     VALUES 
                                       (1,'Ursula Manning',1),
@@ -45,11 +44,8 @@ export class DataFilling1577087002356 implements MigrationInterface {
                                         (2,'In consequat at neque pharetra rutrum. Curabitur rutrum mi sem.',6,1),
                                         (3,'Nulla facilisi. Cras vestibulum dictum dui bibendum maximus. Nullam eu.',8,1),
                                         (4,'Pellentesque habitant morbi tristique senectus et netus et malesuada fames.',7,1),
-                                        (5,'Sed rutrum pretium nunc nec condimentum. Proin non orci imperdiet.',6,1)`);                              
-
+                                        (5,'Sed rutrum pretium nunc nec condimentum. Proin non orci imperdiet.',6,1)`);
   }
 
-  async down(queryRunner: QueryRunner): Promise<any> {
-
-  }
+  async down(queryRunner: QueryRunner): Promise<any> {}
 }

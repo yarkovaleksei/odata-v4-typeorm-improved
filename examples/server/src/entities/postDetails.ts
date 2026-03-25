@@ -1,33 +1,31 @@
-import {Column, Entity, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
-import {Post} from './post';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Post } from './post';
 
 @Entity('post_details')
 export class PostDetails {
-
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({
     type: String,
-    nullable: true
+    nullable: true,
   })
   authorName: string | null;
 
   @Column({
     type: String,
-    nullable: true
+    nullable: true,
   })
   comment: string | null;
 
   @Column({
     type: String,
-    nullable: true
+    nullable: true,
   })
   metadata: string | null;
 
-  @OneToMany(type => Post, post => post.details, {
-    cascade: true
+  @OneToMany((type) => Post, (post) => post.details, {
+    cascade: true,
   })
   posts: Post[];
-
 }

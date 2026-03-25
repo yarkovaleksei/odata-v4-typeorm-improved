@@ -7,7 +7,7 @@ const config = convict({
     doc: 'The application environment.',
     format: ['production', 'development', 'test'],
     default: 'development',
-    env: 'NODE_ENV'
+    env: 'NODE_ENV',
   },
   http: {
     ip: {
@@ -15,67 +15,67 @@ const config = convict({
       format: 'ipaddress',
       default: '127.0.0.1',
       env: 'http_ip',
-      arg: 'http_ip'
+      arg: 'http_ip',
     },
     port: {
       doc: 'The port to bind.',
       format: 'port',
       default: 3001,
       env: 'http_port',
-      arg: 'http_port'
-    }
+      arg: 'http_port',
+    },
   },
   db: {
     host: {
       doc: 'Database host name/IP',
       format: '*',
       default: 'localhost',
-      env: 'db_host'
+      env: 'db_host',
     },
     port: {
       doc: 'Database port number',
       format: Number,
       default: 5432,
-      env: 'db_port'
+      env: 'db_port',
     },
     database: {
       doc: 'Database name',
       format: String,
       default: 'demo_ov4typeorm_posts',
-      env: 'db_database'
+      env: 'db_database',
     },
     username: {
       doc: 'Connection user name',
       format: String,
       default: 'postgres',
-      env: 'db_username'
+      env: 'db_username',
     },
     password: {
       doc: 'Connection user password',
       format: String,
       default: 'q1w2e3R4',
-      env: 'db_password'
+      env: 'db_password',
     },
     name: {
       doc: 'Connection name',
       format: String,
-      default: 'default'
+      default: 'default',
     },
     type: {
       doc: 'Connection type',
       format: String,
-      default: 'postgres'
+      default: 'postgres',
     },
     synchronize: {
       doc: 'Connection synchronize type',
       format: Boolean,
-      default: true
+      default: true,
     },
     logging: {
       doc: 'Enable logging',
       format: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   logger: {
     level: {
@@ -83,9 +83,9 @@ const config = convict({
       format: ['trace', 'debug', 'info', 'warn', 'error', 'fatal'],
       default: 'debug',
       env: 'logger_level',
-      arg: 'logger_level'
-    }
-  }
+      arg: 'logger_level',
+    },
+  },
 });
 
 // Load environment dependent configuration
@@ -96,6 +96,6 @@ if (fs.existsSync(filePath)) {
 }
 
 // Perform validation
-config.validate({allowed: 'strict'});
+config.validate({ allowed: 'strict' });
 
 export default config.get();
