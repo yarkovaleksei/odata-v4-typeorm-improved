@@ -2,8 +2,8 @@ import { query } from 'odata-v4-parser';
 import type { Token } from 'odata-v4-parser/lib/lexer';
 import { SQLLang } from 'odata-v4-sql';
 
+import { TypeOrmVisitor } from './TypeOrmVisitor';
 import type { SqlOptions } from './types';
-import { TypeOrmVisitor } from './visitor';
 
 /**
  * Creates an SQL query descriptor from an OData query string

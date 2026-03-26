@@ -2,7 +2,7 @@ import { Literal } from 'odata-v4-literal';
 import { type Token, TokenType } from 'odata-v4-parser/lib/lexer';
 import { SQLLiteral, SQLLang, Visitor } from 'odata-v4-sql/lib/visitor';
 
-import type { SqlOptions } from './types';
+import type { SqlOptions } from '../types';
 
 interface Context extends Record<string, any> {
   target: string;

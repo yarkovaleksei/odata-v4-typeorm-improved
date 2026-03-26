@@ -4,7 +4,7 @@ import type {
   SelectQueryBuilder,
 } from 'typeorm';
 
-import type { TypeOrmVisitor } from '../visitor';
+import type { TypeOrmVisitor } from '../TypeOrmVisitor';
 import { mapToObject } from './mapToObject';
 
 export const processIncludes = <T extends ObjectLiteral = ObjectLiteral>(
