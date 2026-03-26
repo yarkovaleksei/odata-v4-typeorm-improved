@@ -7,7 +7,7 @@ import { mapToObject } from './mapToObject';
 import { processIncludes } from './processIncludes';
 import { processSearch } from './processSearch';
 import { queryToOdataString } from './queryToOdataString';
-import type { ExecuteQueryOptions } from './types';
+import type { ExecuteQueryOptions, GetManyResponse } from './types';
 
 export const executeQueryByQueryBuilder = async <
   T extends ObjectLiteral = ObjectLiteral,
@@ -15,7 +15,7 @@ export const executeQueryByQueryBuilder = async <
   inputQueryBuilder: SelectQueryBuilder<T>,
   query: QueryParams,
   options: ExecuteQueryOptions = {},
-) => {
+): Promise<T[] | GetManyResponse<T>> => {
   const { $search, ...parsedQueryWithoutSearch } = parseQueryParams(query);
   const localOptions: Required<ExecuteQueryOptions> = {
     alias: '',

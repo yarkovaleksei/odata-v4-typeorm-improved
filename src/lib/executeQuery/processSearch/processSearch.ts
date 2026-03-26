@@ -4,12 +4,12 @@ import type {
   SelectQueryBuilder,
 } from 'typeorm';
 
-import type { QueryParams } from '../types';
+import type { QueryParams } from '../../types';
 
 /**
  * Columns with this type available search with LIKE operator
  */
-const textColumnTypes = [
+export const searchableTextColumnTypes = [
   'varchar',
   'character varying',
   'char',
@@ -26,6 +26,12 @@ const textColumnTypes = [
   'string',
 ];
 
+const searchParamsFactory = ($search: string) => ({
+  search: `%${$search.toLowerCase()}%`,
+});
+const searchSqlFactory = (alias: string) => (column: string) =>
+  `LOWER("${alias}"."${column}") LIKE LOWER(:search)`;
+
 export const processSearch = <T extends ObjectLiteral = ObjectLiteral>(
   queryBuilder: SelectQueryBuilder<T>,
   metadata: EntityMetadata,
@@ -38,15 +44,17 @@ export const processSearch = <T extends ObjectLiteral = ObjectLiteral>(
       const type =
         typeof column.type === 'function' ? column.type.name : column.type;
 
-      return textColumnTypes.includes(type?.toLowerCase());
+      return searchableTextColumnTypes.includes(type?.toLowerCase());
     })
     // Getting column names with the Text type
     .map((column) => column.propertyName);
-  const searchParams = {
-    search: `%${$search.toLowerCase()}%`,
-  };
-  const searchSql = (column: string) =>
-    `LOWER("${alias}"."${column}") LIKE LOWER(:search)`;
+
+  if (textColumns.length === 0) {
+    return;
+  }
+
+  const searchParams = searchParamsFactory($search);
+  const searchSql = searchSqlFactory(alias);
 
   textColumns.forEach((column, index) => {
     if (index === 0) {

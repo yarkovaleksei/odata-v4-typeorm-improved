@@ -12,6 +12,6 @@
     "rootDir": ".",
     "types": ["@types/jest", "@types/node"]
   },
-  "include": ["src/**/*", "src/test/**/*"],
+  "include": ["src/lib/**/*"],
   "exclude": ["build", "node_modules", "examples", "src/**/*.(test|spec).ts"]
 }

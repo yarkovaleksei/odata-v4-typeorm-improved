@@ -1,4 +1,5 @@
 module.exports = {
-  rootDir: 'src/lib',
+  rootDir: 'src',
   preset: 'ts-jest',
+  setupFilesAfterEnv: ['./test/setup/setup.ts'],
 };

@@ -1,12 +1,8 @@
-import {
-  type ObjectLiteral,
-  type Repository,
-  type SelectQueryBuilder,
-} from 'typeorm';
+import type { ObjectLiteral, Repository, SelectQueryBuilder } from 'typeorm';
 
 import type { QueryParams } from '../types';
-import type { ExecuteQueryOptions } from './types';
 import { executeQueryByQueryBuilder } from './executeQueryByQueryBuilder';
+import type { ExecuteQueryOptions } from './types';
 
 export const executeQuery = async <T extends ObjectLiteral = ObjectLiteral>(
   repositoryOrQueryBuilder: Repository<T> | SelectQueryBuilder<T>,

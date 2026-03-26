@@ -1,0 +1,140 @@
+import type { QueryParams } from '../../types';
+import { queryToOdataString } from './queryToOdataString';
+
+describe('queryToOdataString', () => {
+  it('should return an empty string for an empty query object', () => {
+    const result = queryToOdataString({});
+
+    expect(result).toBe('');
+  });
+
+  it('should ignore keys that do not start with "$"', () => {
+    const query: QueryParams & { [key: string]: any } = {
+      $search: 'test',
+      customParam: 'ignore',
+      another: 123,
+    };
+    const result = queryToOdataString(query);
+
+    expect(result).toBe('$search=test');
+  });
+
+  it('should handle a single $search parameter', () => {
+    const query: QueryParams = { $search: 'hello' };
+    const result = queryToOdataString(query);
+
+    expect(result).toBe('$search=hello');
+  });
+
+  it('should handle multiple $ parameters', () => {
+    const query: QueryParams = {
+      $search: 'hello',
+      $filter: 'name eq "John"',
+      $top: 10,
+      $skip: 5,
+      $count: true,
+    };
+    const result = queryToOdataString(query);
+
+    expect(result).toContain('$search=hello');
+    expect(result).toContain('$filter=name%20eq%20%22John%22');
+    expect(result).toContain('$top=10');
+    expect(result).toContain('$skip=5');
+    expect(result).toContain('$count=true');
+    expect(result.split('&').length).toBe(5);
+  });
+
+  it('should ignore parameters with null or undefined values', () => {
+    const query: QueryParams = {
+      $search: 'keep',
+      // @ts-ignore
+      $filter: null,
+      $orderby: undefined,
+      $top: 0,
+    };
+    const result = queryToOdataString(query);
+
+    expect(result).toBe('$search=keep&$top=0');
+  });
+
+  it('should encode URI components correctly', () => {
+    const query: QueryParams = {
+      $search: 'hello world',
+      $filter: 'price gt 100',
+      $expand: 'products($select=id,name)',
+    };
+    const result = queryToOdataString(query);
+
+    expect(result).toBe(
+      '$search=hello%20world&$filter=price%20gt%20100&$expand=products($select=id,name)',
+    );
+  });
+
+  it('should convert number and boolean values to strings', () => {
+    const query: QueryParams = {
+      $top: 5,
+      $skip: 0,
+      $count: false,
+    };
+    const result = queryToOdataString(query);
+
+    expect(result).toBe('$top=5&$skip=0&$count=false');
+  });
+
+  it('should handle numeric values as strings if provided', () => {
+    const query: QueryParams = {
+      $top: '10',
+      $skip: '20',
+    };
+    const result = queryToOdataString(query);
+
+    expect(result).toBe('$top=10&$skip=20');
+  });
+
+  it('should handle special characters in keys (though keys are predefined)', () => {
+    const query = {
+      '$special-key@': 'value',
+    } as QueryParams;
+    const result = queryToOdataString(query);
+
+    expect(result).toBe('$special-key@=value');
+  });
+
+  it('should not include parameters where key starts with $ but value is falsy (except 0, false, empty string)', () => {
+    const query: QueryParams = {
+      $top: 0,
+      $skip: '',
+      $count: false,
+      // @ts-ignore
+      $filter: null,
+    };
+    const result = queryToOdataString(query);
+
+    expect(result).toContain('$top=0');
+    expect(result).toContain('$skip=');
+    expect(result).toContain('$count=false');
+    expect(result.split('&').length).toBe(3);
+  });
+
+  it('should return an empty string if all $ keys have null/undefined values', () => {
+    const query: QueryParams = {
+      // @ts-ignore
+      $search: null,
+      $filter: undefined,
+    };
+    const result = queryToOdataString(query);
+
+    expect(result).toBe('');
+  });
+
+  it('should preserve the order of parameters as they appear in the object (according to ES specification)', () => {
+    const query: QueryParams = {
+      $orderby: 'name',
+      $search: 'test',
+      $top: 10,
+    };
+    const result = queryToOdataString(query);
+
+    expect(result).toBe('$orderby=name&$search=test&$top=10');
+  });
+});
