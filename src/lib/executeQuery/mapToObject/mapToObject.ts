@@ -1,5 +1,7 @@
-export const mapToObject = (aMap: Map<string, any>): Record<string, any> => {
-  const obj: Record<string, any> = {};
+export const mapToObject = (
+  aMap: Map<string, unknown>,
+): Record<string, unknown> => {
+  const obj: Record<string, unknown> = {};
 
   if (aMap) {
     aMap.forEach((v, k) => {

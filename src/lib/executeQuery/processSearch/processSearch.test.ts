@@ -1,11 +1,15 @@
-import type { SelectQueryBuilder, EntityMetadata } from 'typeorm';
+import type {
+  EntityMetadata,
+  ObjectLiteral,
+  SelectQueryBuilder,
+} from 'typeorm';
 
 import { processSearch, searchableTextColumnTypes } from './processSearch';
 
 type ColumnMetadata = EntityMetadata['columns'][0];
 
 describe('processSearch', () => {
-  let queryBuilder: jest.Mocked<SelectQueryBuilder<any>>;
+  let queryBuilder: jest.Mocked<SelectQueryBuilder<ObjectLiteral>>;
   let metadata: EntityMetadata;
   let alias: string;
 
@@ -14,7 +18,7 @@ describe('processSearch', () => {
     queryBuilder = {
       andWhere: jest.fn().mockReturnThis(),
       orWhere: jest.fn().mockReturnThis(),
-    } as any;
+    } as unknown as jest.Mocked<SelectQueryBuilder<ObjectLiteral>>;
     alias = 'user';
   });
 
@@ -237,7 +241,10 @@ describe('processSearch', () => {
 
         metadata = { columns } as EntityMetadata;
 
-        const freshBuilder = { andWhere: jest.fn(), orWhere: jest.fn() } as any;
+        const freshBuilder = {
+          andWhere: jest.fn(),
+          orWhere: jest.fn(),
+        } as unknown as SelectQueryBuilder<ObjectLiteral>;
 
         processSearch(freshBuilder, metadata, 'test', alias);
 

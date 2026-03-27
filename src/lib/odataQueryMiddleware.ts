@@ -6,7 +6,7 @@ import type { QueryParams } from './types';
 
 interface OdataQuerySettings {
   logger?: {
-    error: (text: string, ...args: any[]) => void;
+    error: (text: string, ...args: unknown[]) => void;
   };
 }
 

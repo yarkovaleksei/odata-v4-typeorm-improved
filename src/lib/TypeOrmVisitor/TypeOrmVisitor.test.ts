@@ -8,7 +8,7 @@ describe('TypeOrmVisitor', () => {
     odataQuery: string,
     options: Partial<SqlOptions> = {},
     table = 'users',
-  ): { sql: string; parameters: Map<string, any> } {
+  ): { sql: string; parameters: Map<string, unknown> } {
     const ast = query(odataQuery);
     const visitor = new TypeOrmVisitor({
       alias: 'u',
@@ -106,7 +106,7 @@ describe('TypeOrmVisitor', () => {
 
   describe('$expand', () => {
     it('should create include visitors for expanded relations', () => {
-      const { sql, parameters } = processQuery('$expand=Profile');
+      const { sql } = processQuery('$expand=Profile');
 
       expect(sql).toContain('SELECT * FROM users WHERE 1 = 1 ORDER BY 1');
 

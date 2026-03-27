@@ -1,4 +1,4 @@
-import type { ParsedQueryParams, QueryParams } from '../types';
+import type { QueryParams } from '../types';
 
 import { parseQueryParams } from './parseQueryParams';
 
@@ -36,7 +36,7 @@ describe('parseQueryParams', () => {
 
     it('should set $search to undefined when it is null (though type says string)', () => {
       // В реальности QueryParams допускает только string, но для полноты
-      const query = { $search: null as any };
+      const query = { $search: null as never };
       const result = parseQueryParams(query);
       expect(result.$search).toBeUndefined();
     });
@@ -62,7 +62,7 @@ describe('parseQueryParams', () => {
     });
 
     it('should default to 0 when $top is null (though type says number | string)', () => {
-      const query = { $top: null as any };
+      const query = { $top: null as never };
       const result = parseQueryParams(query);
       expect(result.$top).toBe(0);
     });
@@ -106,7 +106,7 @@ describe('parseQueryParams', () => {
     });
 
     it('should default to 0 when $skip is null', () => {
-      const query = { $skip: null as any };
+      const query = { $skip: null as never };
       const result = parseQueryParams(query);
       expect(result.$skip).toBe(0);
     });
@@ -156,7 +156,7 @@ describe('parseQueryParams', () => {
     });
 
     it('should convert number 1 to false (not a boolean or string "true")', () => {
-      const query = { $count: 1 as any };
+      const query = { $count: 1 as never };
       const result = parseQueryParams(query);
       expect(result.$count).toBe(false);
     });

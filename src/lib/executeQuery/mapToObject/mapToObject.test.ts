@@ -2,7 +2,7 @@ import { mapToObject } from './mapToObject';
 
 describe('mapToObject', () => {
   it('should convert a non-empty Map to an object', () => {
-    const map = new Map<string, any>([
+    const map = new Map<string, unknown>([
       ['key1', 'value1'],
       ['key2', 42],
       ['key3', true],
@@ -22,32 +22,32 @@ describe('mapToObject', () => {
   });
 
   it('should return an empty object for an empty Map', () => {
-    const map = new Map<string, any>();
+    const map = new Map<string, unknown>();
     const result = mapToObject(map);
 
     expect(result).toEqual({});
   });
 
   it('should return an empty object for null input', () => {
-    const result = mapToObject(null as any);
+    const result = mapToObject(null as unknown as Map<string, unknown>);
 
     expect(result).toEqual({});
   });
 
   it('should return an empty object for undefined input', () => {
-    const result = mapToObject(undefined as any);
+    const result = mapToObject(undefined as unknown as Map<string, unknown>);
 
     expect(result).toEqual({});
   });
 
   it('should handle other falsy values (e.g., false) as empty object', () => {
-    const result = mapToObject(false as any);
+    const result = mapToObject(false as unknown as Map<string, unknown>);
 
     expect(result).toEqual({});
   });
 
   it('should preserve all value types', () => {
-    const map = new Map<string, any>([
+    const map = new Map<string, unknown>([
       ['string', 'text'],
       ['number', 123],
       ['boolean', false],
@@ -71,7 +71,7 @@ describe('mapToObject', () => {
   });
 
   it('should not mutate the original Map', () => {
-    const originalMap = new Map<string, any>([['a', 1]]);
+    const originalMap = new Map<string, unknown>([['a', 1]]);
     const snapshot = new Map(originalMap);
 
     mapToObject(originalMap);

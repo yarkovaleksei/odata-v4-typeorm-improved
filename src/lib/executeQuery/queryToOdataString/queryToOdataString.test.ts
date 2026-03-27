@@ -9,7 +9,7 @@ describe('queryToOdataString', () => {
   });
 
   it('should ignore keys that do not start with "$"', () => {
-    const query: QueryParams & { [key: string]: any } = {
+    const query: QueryParams & { [key: string]: string | number } = {
       $search: 'test',
       customParam: 'ignore',
       another: 123,

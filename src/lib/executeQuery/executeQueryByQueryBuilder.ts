@@ -29,7 +29,7 @@ export const executeQueryByQueryBuilder = async <
   const metadata = inputQueryBuilder.connection.getMetadata(alias);
 
   let queryBuilder = inputQueryBuilder;
-  let root_select: string[] = [];
+  let root_select: string[];
 
   // Unlike the relations which are done via leftJoin[AndSelect](), we must explicitly add root
   // entity fields to the selection if it hasn't been narrowed down by the user.

@@ -9,8 +9,8 @@ import {
   Stream,
 } from 'odata-v4-server';
 
-let db: pg.PoolConfig = config.get<pg.PoolConfig>('sqlConfig');
-let pool = new pg.Pool(db);
+const db: pg.PoolConfig = config.get<pg.PoolConfig>('sqlConfig');
+const pool = new pg.Pool(db);
 
 @Edm.OpenType
 class Country {

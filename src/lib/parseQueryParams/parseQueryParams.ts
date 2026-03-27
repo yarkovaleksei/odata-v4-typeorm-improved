@@ -1,28 +1,24 @@
 import type { ParsedQueryParams, QueryParams } from '../types';
 
 export const parseQueryParams = (query: QueryParams): ParsedQueryParams => {
-  let { $search, $top, $skip, $count, ...queryWithoutSearch } = query;
-
-  $search =
-    typeof $search === 'string' && $search.trim().length > 0
-      ? $search.trim()
+  query.$search =
+    typeof query.$search === 'string' && query.$search.trim().length > 0
+      ? query.$search.trim()
       : undefined;
-  $top = typeof $top === 'string' ? parseInt($top, 10) : ($top ?? 0);
-  $skip = typeof $skip === 'string' ? parseInt($skip, 10) : ($skip ?? 0);
-  $count =
-    typeof $count === 'undefined'
+  query.$top =
+    typeof query.$top === 'string'
+      ? parseInt(query.$top, 10)
+      : (query.$top ?? 0);
+  query.$skip =
+    typeof query.$skip === 'string'
+      ? parseInt(query.$skip, 10)
+      : (query.$skip ?? 0);
+  query.$count =
+    typeof query.$count === 'undefined'
       ? true
-      : typeof $count === 'boolean'
-        ? $count
-        : $count === 'true';
+      : typeof query.$count === 'boolean'
+        ? query.$count
+        : query.$count === 'true';
 
-  const parsedQuery: ParsedQueryParams = {
-    ...queryWithoutSearch,
-    $search,
-    $top,
-    $skip,
-    $count,
-  };
-
-  return parsedQuery;
+  return query as ParsedQueryParams;
 };
