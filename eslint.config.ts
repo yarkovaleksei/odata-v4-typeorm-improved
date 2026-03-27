@@ -8,6 +8,13 @@ export default tseslint.config(
     ignores: ['node_modules', 'build', 'examples', '**/*.js'],
   },
   {
+    languageOptions: {
+      parserOptions: {
+        warnOnUnsupportedTypeScriptVersion: false,
+      },
+    },
+  },
+  {
     rules: {
       '@typescript-eslint/no-unused-vars': [
         'error',
