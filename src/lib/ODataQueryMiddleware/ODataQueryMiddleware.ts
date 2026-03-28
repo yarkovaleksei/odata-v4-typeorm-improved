@@ -1,31 +1,32 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { ObjectLiteral, Repository, SelectQueryBuilder } from 'typeorm';
 
-import { executeQuery } from './executeQuery';
-import type { QueryParams } from './types';
+import { executeQuery } from '../executeQuery';
+import type { QueryParams } from '../types';
 
-interface OdataQuerySettings {
+interface ODataQueryMiddlewareSettings {
   logger?: {
     error: (text: string, ...args: unknown[]) => void;
   };
+  alias?: string;
 }
 
 /**
- * OData express middleware
+ * OData express style middleware
  */
-export function odataQuery<T extends ObjectLiteral = ObjectLiteral>(
+export function ODataQueryMiddleware<T extends ObjectLiteral = ObjectLiteral>(
   repositoryOrQueryBuilder: Repository<T> | SelectQueryBuilder<T>,
-  settings: OdataQuerySettings = {}
+  settings: ODataQueryMiddlewareSettings = {}
 ) {
   return async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const alias = '';
+    const defaultAlias = '';
 
+    try {
       const result = await executeQuery(
         repositoryOrQueryBuilder,
         req.query as unknown as QueryParams,
         {
-          alias,
+          alias: settings?.alias ?? defaultAlias,
         }
       );
 

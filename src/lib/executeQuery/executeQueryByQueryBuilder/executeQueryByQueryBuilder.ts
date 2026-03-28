@@ -1,13 +1,13 @@
 import type { ObjectLiteral, SelectQueryBuilder } from 'typeorm';
 
 import { createQuery } from '../../createQuery';
-import { parseQueryParams } from '../../parseQueryParams';
 import type { QueryParams } from '../../types';
 import { mapToObject } from '../mapToObject';
 import { processIncludes } from '../processIncludes';
 import { processSearch } from '../processSearch';
 import { queryToOdataString } from '../queryToOdataString';
 import type { ExecuteQueryOptions, GetManyResponse } from '../types';
+import { parseQueryParams } from './parseQueryParams';
 
 /**
  * Выполняет запрос с помощью QueryBuilder с поддержкой OData-подобных параметров.

@@ -10,9 +10,9 @@ export interface QueryParams {
   $orderby?: string;
   $select?: string;
   $expand?: string;
-  $top?: string | number;
-  $skip?: string | number;
-  $count?: string | boolean;
+  $top?: string;
+  $skip?: string;
+  $count?: string;
 }
 
 export type ParsedQueryParams = Pick<
