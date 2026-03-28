@@ -2,13 +2,13 @@ import type { QueryParams } from '../../types';
 import { queryToOdataString } from './queryToOdataString';
 
 describe('queryToOdataString', () => {
-  it('should return an empty string for an empty query object', () => {
+  it('должен вернуть пустую строку для пустого объекта запроса', () => {
     const result = queryToOdataString({});
 
     expect(result).toBe('');
   });
 
-  it('should ignore keys that do not start with "$"', () => {
+  it('должен игнорировать ключи, которые не начинаются с "$"', () => {
     const query: QueryParams & { [key: string]: string | number } = {
       $search: 'test',
       customParam: 'ignore',
@@ -19,14 +19,14 @@ describe('queryToOdataString', () => {
     expect(result).toBe('$search=test');
   });
 
-  it('should handle a single $search parameter', () => {
+  it('должен обрабатывать единственный параметр $search', () => {
     const query: QueryParams = { $search: 'hello' };
     const result = queryToOdataString(query);
 
     expect(result).toBe('$search=hello');
   });
 
-  it('should handle multiple $ parameters', () => {
+  it('должен обрабатывать несколько параметров с префиксом "$"', () => {
     const query: QueryParams = {
       $search: 'hello',
       $filter: 'name eq "John"',
@@ -44,7 +44,7 @@ describe('queryToOdataString', () => {
     expect(result.split('&').length).toBe(5);
   });
 
-  it('should ignore parameters with null or undefined values', () => {
+  it('должен игнорировать параметры со значениями null или undefined', () => {
     const query: QueryParams = {
       $search: 'keep',
       // @ts-ignore
@@ -57,7 +57,7 @@ describe('queryToOdataString', () => {
     expect(result).toBe('$search=keep&$top=0');
   });
 
-  it('should encode URI components correctly', () => {
+  it('должен корректно кодировать URI-компоненты', () => {
     const query: QueryParams = {
       $search: 'hello world',
       $filter: 'price gt 100',
@@ -70,7 +70,7 @@ describe('queryToOdataString', () => {
     );
   });
 
-  it('should convert number and boolean values to strings', () => {
+  it('должен преобразовывать числовые и булевы значения в строки', () => {
     const query: QueryParams = {
       $top: 5,
       $skip: 0,
@@ -81,7 +81,7 @@ describe('queryToOdataString', () => {
     expect(result).toBe('$top=5&$skip=0&$count=false');
   });
 
-  it('should handle numeric values as strings if provided', () => {
+  it('должен обрабатывать числовые значения, переданные как строки', () => {
     const query: QueryParams = {
       $top: '10',
       $skip: '20',
@@ -91,7 +91,7 @@ describe('queryToOdataString', () => {
     expect(result).toBe('$top=10&$skip=20');
   });
 
-  it('should handle special characters in keys (though keys are predefined)', () => {
+  it('должен обрабатывать специальные символы в ключах (хотя ключи предопределены)', () => {
     const query = {
       '$special-key@': 'value',
     } as QueryParams;
@@ -100,7 +100,7 @@ describe('queryToOdataString', () => {
     expect(result).toBe('$special-key@=value');
   });
 
-  it('should not include parameters where key starts with $ but value is falsy (except 0, false, empty string)', () => {
+  it('не должен включать параметры, где ключ начинается с "$", но значение ложное (кроме 0, false, пустой строки)', () => {
     const query: QueryParams = {
       $top: 0,
       $skip: '',
@@ -116,7 +116,7 @@ describe('queryToOdataString', () => {
     expect(result.split('&').length).toBe(3);
   });
 
-  it('should return an empty string if all $ keys have null/undefined values', () => {
+  it('должен вернуть пустую строку, если все параметры с "$" имеют значения null/undefined', () => {
     const query: QueryParams = {
       // @ts-ignore
       $search: null,
@@ -127,7 +127,7 @@ describe('queryToOdataString', () => {
     expect(result).toBe('');
   });
 
-  it('should preserve the order of parameters as they appear in the object (according to ES specification)', () => {
+  it('должен сохранять порядок параметров в том виде, в каком они указаны в объекте (согласно спецификации ES)', () => {
     const query: QueryParams = {
       $orderby: 'name',
       $search: 'test',

@@ -1,10 +1,37 @@
 import type { QueryParams } from '../../types';
 
-const e = (s: string) => encodeURI(s);
-
+/**
+ * Преобразует объект параметров запроса в OData-строку.
+ *
+ * Функция отбирает только те поля, чьи ключи начинаются с символа `$`,
+ * и значения не равны `null` или `undefined`. Оставшиеся пары кодируются
+ * с помощью `encodeURI` и объединяются через `&`.
+ *
+ * ВНИМАНИЕ: для корректного кодирования URI-компонентов следовало бы использовать
+ * `encodeURIComponent`, а не `encodeURI`. `encodeURI` не экранирует такие символы,
+ * как `&`, `=`, `#` и другие, что может привести к некорректному разбору строки.
+ *
+ * Но если использовать `encodeURIComponent`, то в конструкциях вида `$expand=CreatedBy($select=Id),CreatedBy($select=FirstName)`
+ * вложенный символ `$` тоже будет закодирован, что может привести к некорректному разбору строки.
+ *
+ * @param query - объект с параметрами запроса (например, `{ $search: 'hello', $top: 5 }`)
+ * @returns строка вида `$search=hello&$top=5` или пустая строка, если подходящих параметров нет
+ */
 export const queryToOdataString = (query: QueryParams): string => {
-  return Object.entries(query)
-    .filter(([key, value]) => key.startsWith('$') && value != null)
-    .map(([key, value]) => `$${e(key.slice(1))}=${e(value)}`)
-    .join('&');
+  // Преобразуем объект в массив пар [ключ, значение]
+  return (
+    Object.entries(query)
+      /**
+       * Оставляем только параметры, начинающиеся с "$" и имеющие значимое значение,
+       * то есть не null и не undefined.
+       */
+      .filter(([key, value]) => key.startsWith('$') && value != null)
+      /**
+       * Для каждой пары формируем строку "$ключ=значение", предварительно кодируя ключ и значение.
+       * В ключе кодируем всё кроме первого символа "$".
+       */
+      .map(([key, value]) => `$${encodeURI(key.slice(1))}=${encodeURI(value)}`)
+      // Объединяем все части через "&"
+      .join('&')
+  );
 };

@@ -1,245 +1,211 @@
-import type { EntityMetadata, ObjectLiteral, SelectQueryBuilder } from 'typeorm';
+import type {
+  EntityMetadata,
+  ObjectLiteral,
+  SelectQueryBuilder,
+  WhereExpressionBuilder,
+} from 'typeorm';
+import { Brackets } from 'typeorm';
+import { processSearch } from './processSearch';
 
-import { processSearch, searchableTextColumnTypes } from './processSearch';
+type WhereResult = [Brackets, Record<string, string>];
 
-type ColumnMetadata = EntityMetadata['columns'][0];
+// Мок QueryBuilder
+const createMockQueryBuilder = () => {
+  const mock = {
+    andWhere: jest.fn().mockReturnThis(),
+    orWhere: jest.fn().mockReturnThis(),
+  };
+
+  return mock as unknown as SelectQueryBuilder<ObjectLiteral>;
+};
+
+// Мок EntityMetadata
+const createMockMetadata = (columns: Partial<EntityMetadata['columns'][0]>[]): EntityMetadata => {
+  return {
+    columns: columns.map((col) => ({
+      propertyName: col.propertyName,
+      type: col.type,
+    })),
+  } as EntityMetadata;
+};
 
 describe('processSearch', () => {
-  let queryBuilder: jest.Mocked<SelectQueryBuilder<ObjectLiteral>>;
-  let metadata: EntityMetadata;
-  let alias: string;
+  let queryBuilder: SelectQueryBuilder<ObjectLiteral>;
+  const alias = 'entity';
 
   beforeEach(() => {
-    // SelectQueryBuilder Mock
-    queryBuilder = {
-      andWhere: jest.fn().mockReturnThis(),
+    queryBuilder = createMockQueryBuilder();
+    jest.clearAllMocks();
+  });
+
+  test('должен добавить текстовый поиск, если $search – строка', () => {
+    const metadata = createMockMetadata([
+      { propertyName: 'title', type: 'varchar' },
+      { propertyName: 'age', type: 'integer' },
+    ]);
+    const $search = 'hello';
+
+    processSearch(queryBuilder, metadata, $search, alias);
+
+    expect(queryBuilder.andWhere).toHaveBeenCalledTimes(1);
+
+    const [brackets, params]: WhereResult = (queryBuilder.andWhere as jest.Mock).mock.calls[0];
+
+    expect(brackets).toBeInstanceOf(Brackets);
+    expect(params).toEqual({ textSearchValue: '%hello%' });
+
+    // Проверяем внутренние условия
+    const innerQb = {
+      where: jest.fn().mockReturnThis(),
       orWhere: jest.fn().mockReturnThis(),
-    } as unknown as jest.Mocked<SelectQueryBuilder<ObjectLiteral>>;
-    alias = 'user';
-  });
+    } as Partial<WhereExpressionBuilder>;
 
-  describe('Basic scenarios', () => {
-    it('should add andWhere for first text column and orWhere for others', () => {
-      const columns = [
-        { propertyName: 'firstName', type: 'varchar' },
-        { propertyName: 'lastName', type: 'varchar' },
-        { propertyName: 'age', type: 'integer' }, // не текстовый
-      ] as ColumnMetadata[];
+    brackets.whereFactory(innerQb as WhereExpressionBuilder);
 
-      metadata = { columns } as EntityMetadata;
-
-      processSearch(queryBuilder, metadata, 'john', alias);
-
-      expect(queryBuilder.andWhere).toHaveBeenCalledTimes(1);
-      expect(queryBuilder.orWhere).toHaveBeenCalledTimes(1);
-      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
-        'LOWER("user"."firstName") LIKE LOWER(:search)',
-        { search: '%john%' }
-      );
-      expect(queryBuilder.orWhere).toHaveBeenCalledWith(
-        'LOWER("user"."lastName") LIKE LOWER(:search)',
-        { search: '%john%' }
-      );
-    });
-
-    it('should handle column.type as a function (e.g., String for SQLite)', () => {
-      const columns = [
-        { propertyName: 'description', type: String }, // type.name === 'String'
-      ] as ColumnMetadata[];
-
-      metadata = { columns } as EntityMetadata;
-
-      processSearch(queryBuilder, metadata, 'test', alias);
-
-      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
-        'LOWER("user"."description") LIKE LOWER(:search)',
-        { search: '%test%' }
-      );
-    });
-
-    it('should do nothing if there are no text columns', () => {
-      const columns = [
-        { propertyName: 'id', type: 'integer' },
-        { propertyName: 'age', type: 'int' },
-      ] as ColumnMetadata[];
-
-      metadata = { columns } as EntityMetadata;
-
-      processSearch(queryBuilder, metadata, 'john', alias);
-
-      expect(queryBuilder.andWhere).not.toHaveBeenCalled();
-      expect(queryBuilder.orWhere).not.toHaveBeenCalled();
-    });
-
-    it('should handle only one text column', () => {
-      const columns = [{ propertyName: 'name', type: 'varchar' }] as ColumnMetadata[];
-
-      metadata = { columns } as EntityMetadata;
-
-      processSearch(queryBuilder, metadata, 'john', alias);
-
-      expect(queryBuilder.andWhere).toHaveBeenCalledTimes(1);
-      expect(queryBuilder.orWhere).not.toHaveBeenCalled();
-      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
-        'LOWER("user"."name") LIKE LOWER(:search)',
-        { search: '%john%' }
-      );
-    });
-
-    it('should use the provided alias', () => {
-      const columns = [{ propertyName: 'email', type: 'varchar' }] as ColumnMetadata[];
-
-      metadata = { columns } as EntityMetadata;
-
-      const customAlias = 'usr';
-
-      processSearch(queryBuilder, metadata, 'test', customAlias);
-
-      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
-        'LOWER("usr"."email") LIKE LOWER(:search)',
-        expect.any(Object)
-      );
-    });
-
-    it('should convert search string to lowercase and wrap with %', () => {
-      const columns = [{ propertyName: 'name', type: 'varchar' }] as ColumnMetadata[];
-
-      metadata = { columns } as EntityMetadata;
-
-      processSearch(queryBuilder, metadata, 'JoHn DoE', alias);
-
-      expect(queryBuilder.andWhere).toHaveBeenCalledWith(expect.any(String), {
-        search: '%john doe%',
-      });
-    });
-
-    it('should handle an empty search string (resulting in %%)', () => {
-      const columns = [{ propertyName: 'name', type: 'varchar' }] as ColumnMetadata[];
-
-      metadata = { columns } as EntityMetadata;
-
-      processSearch(queryBuilder, metadata, '', alias);
-
-      expect(queryBuilder.andWhere).toHaveBeenCalledWith(expect.any(String), {
-        search: '%%',
-      });
-    });
-
-    it('should match text column types case‑insensitively', () => {
-      const columns = [
-        { propertyName: 'name', type: 'VARCHAR' }, // UPPER CASE
-      ] as unknown as ColumnMetadata[];
-
-      metadata = { columns } as EntityMetadata;
-
-      processSearch(queryBuilder, metadata, 'test', alias);
-
-      expect(queryBuilder.andWhere).toHaveBeenCalled();
-    });
-
-    it('should ignore column types not present in "searchableTextColumnTypes"', () => {
-      class CustomType {}
-      const columns = [
-        { propertyName: 'custom', type: CustomType }, // type.name = 'CustomType'
-      ] as ColumnMetadata[];
-
-      metadata = { columns } as EntityMetadata;
-
-      processSearch(queryBuilder, metadata, 'test', alias);
-
-      expect(queryBuilder.andWhere).not.toHaveBeenCalled();
-    });
-
-    it('should not mutate the original search string', () => {
-      const columns = [{ propertyName: 'name', type: 'varchar' }] as ColumnMetadata[];
-
-      metadata = { columns } as EntityMetadata;
-
-      const originalSearch = 'Original';
-
-      processSearch(queryBuilder, metadata, originalSearch, alias);
-
-      expect(originalSearch).toBe('Original');
-    });
-  });
-
-  describe('Text column type detection', () => {
-    // Параметризованный тест для каждого текстового типа из списка
-    it.each(searchableTextColumnTypes)(
-      'should include column with type "%s" as text column',
-      (type) => {
-        const columns = [{ propertyName: 'content', type }] as ColumnMetadata[];
-
-        metadata = { columns } as EntityMetadata;
-
-        processSearch(queryBuilder, metadata, 'test', alias);
-
-        expect(queryBuilder.andWhere).toHaveBeenCalledTimes(1);
-        expect(queryBuilder.andWhere).toHaveBeenCalledWith(
-          expect.stringContaining('LOWER("user"."content") LIKE LOWER(:search)'),
-          expect.objectContaining({ search: '%test%' })
-        );
-      }
+    expect(innerQb.where).toHaveBeenCalledWith(
+      'LOWER("entity"."title") LIKE LOWER(:textSearchValue)'
     );
+    expect(innerQb.orWhere).not.toHaveBeenCalled(); // только одна текстовая колонка
+  });
 
-    it.each(searchableTextColumnTypes)('should handle type "%s" in uppercase', (type) => {
-      const columns = [{ propertyName: 'content', type: type.toUpperCase() }] as ColumnMetadata[];
+  test('должен добавить числовой поиск, если $search – число', () => {
+    const metadata = createMockMetadata([
+      { propertyName: 'title', type: 'varchar' },
+      { propertyName: 'age', type: 'integer' },
+    ]);
+    const $search = '42';
 
-      metadata = { columns } as EntityMetadata;
+    processSearch(queryBuilder, metadata, $search, alias);
 
-      processSearch(queryBuilder, metadata, 'test', alias);
+    const [brackets, params]: WhereResult = (queryBuilder.andWhere as jest.Mock).mock.calls[0];
 
-      expect(queryBuilder.andWhere).toHaveBeenCalledTimes(1);
-    });
+    expect(params).toEqual({ textSearchValue: '%42%', numberSearchValue: 42 });
 
-    it('should handle type as function (String)', () => {
-      const columns = [{ propertyName: 'content', type: String }] as ColumnMetadata[];
+    const innerQb = {
+      where: jest.fn().mockReturnThis(),
+      orWhere: jest.fn().mockReturnThis(),
+    } as Partial<WhereExpressionBuilder>;
 
-      metadata = { columns } as EntityMetadata;
+    brackets.whereFactory(innerQb as WhereExpressionBuilder);
 
-      processSearch(queryBuilder, metadata, 'test', alias);
+    // Текстовое условие (первое) -> where, числовое -> orWhere
+    expect(innerQb.where).toHaveBeenCalledWith(
+      'LOWER("entity"."title") LIKE LOWER(:textSearchValue)'
+    );
+    expect(innerQb.orWhere).toHaveBeenCalledWith('"entity"."age" = :numberSearchValue');
+  });
 
-      expect(queryBuilder.andWhere).toHaveBeenCalledTimes(1);
-    });
+  test('должен добавить только текстовый поиск, если $search – не число', () => {
+    const metadata = createMockMetadata([
+      { propertyName: 'age', type: 'integer' },
+      { propertyName: 'score', type: 'float' },
+      { propertyName: 'text', type: 'varchar' },
+    ]);
+    const $search = 'abc';
 
-    it('should ignore column types not present in textColumnTypes', () => {
-      const nonTextTypes = [
-        'integer',
-        'int',
-        'boolean',
-        'date',
-        'datetime',
-        'float',
-        'decimal',
-        'json',
-      ];
-      for (const type of nonTextTypes) {
-        const columns = [{ propertyName: 'id', type }] as ColumnMetadata[];
+    processSearch(queryBuilder, metadata, $search, alias);
 
-        metadata = { columns } as EntityMetadata;
+    const [brackets, params]: WhereResult = (queryBuilder.andWhere as jest.Mock).mock.calls[0];
 
-        const freshBuilder = {
-          andWhere: jest.fn(),
-          orWhere: jest.fn(),
-        } as unknown as SelectQueryBuilder<ObjectLiteral>;
+    expect(params).toEqual({ textSearchValue: '%abc%' });
+    expect(params).not.toHaveProperty('numberSearchValue');
 
-        processSearch(freshBuilder, metadata, 'test', alias);
+    const innerQb = {
+      where: jest.fn().mockReturnThis(),
+      orWhere: jest.fn().mockReturnThis(),
+    } as Partial<WhereExpressionBuilder>;
 
-        expect(freshBuilder.andWhere).not.toHaveBeenCalled();
-        expect(freshBuilder.orWhere).not.toHaveBeenCalled();
-      }
-    });
+    brackets.whereFactory(innerQb as WhereExpressionBuilder);
 
-    it('should treat custom function type as non-text unless its name matches', () => {
-      class CustomType {}
-      const columns = [{ propertyName: 'custom', type: CustomType }] as ColumnMetadata[];
+    expect(innerQb.where).toHaveBeenCalledWith(
+      'LOWER("entity"."text") LIKE LOWER(:textSearchValue)'
+    );
+  });
 
-      metadata = { columns } as EntityMetadata;
+  test('не должен добавлять числовой поиск, если текстовые колонки есть, но $search – не число', () => {
+    const metadata = createMockMetadata([
+      { propertyName: 'name', type: 'varchar' },
+      { propertyName: 'age', type: 'integer' },
+    ]);
+    const $search = 'abc123';
 
-      processSearch(queryBuilder, metadata, 'test', alias);
+    processSearch(queryBuilder, metadata, $search, alias);
 
-      expect(queryBuilder.andWhere).not.toHaveBeenCalled();
-      expect(queryBuilder.orWhere).not.toHaveBeenCalled();
-    });
+    const [, params]: WhereResult = (queryBuilder.andWhere as jest.Mock).mock.calls[0];
+
+    expect(params).toEqual({ textSearchValue: '%abc123%' });
+    expect(params).not.toHaveProperty('numberSearchValue');
+  });
+
+  test('должен добавить только числовой поиск, если текстовых колонок нет, а $search – число', () => {
+    const metadata = createMockMetadata([
+      { propertyName: 'age', type: 'integer' },
+      { propertyName: 'salary', type: 'decimal' },
+    ]);
+    const $search = '50000';
+
+    processSearch(queryBuilder, metadata, $search, alias);
+
+    const [brackets, params]: WhereResult = (queryBuilder.andWhere as jest.Mock).mock.calls[0];
+
+    expect(params).toEqual({ numberSearchValue: 50000 });
+    expect(params).not.toHaveProperty('textSearchValue');
+
+    const innerQb = {
+      where: jest.fn().mockReturnThis(),
+      orWhere: jest.fn().mockReturnThis(),
+    } as Partial<WhereExpressionBuilder>;
+
+    brackets.whereFactory(innerQb as WhereExpressionBuilder);
+
+    expect(innerQb.where).toHaveBeenCalledWith('"entity"."age" = :numberSearchValue');
+    expect(innerQb.orWhere).toHaveBeenCalledWith('"entity"."salary" = :numberSearchValue');
+  });
+
+  test('не должен добавлять никаких условий, если $search пустая строка', () => {
+    const metadata = createMockMetadata([{ propertyName: 'title', type: 'varchar' }]);
+
+    processSearch(queryBuilder, metadata, '', alias);
+    expect(queryBuilder.andWhere).not.toHaveBeenCalled();
+  });
+
+  test('не должен добавлять условий, если $search null или undefined', () => {
+    const metadata = createMockMetadata([{ propertyName: 'title', type: 'varchar' }]);
+
+    // @ts-ignore
+    processSearch(queryBuilder, metadata, null as string, alias);
+
+    expect(queryBuilder.andWhere).not.toHaveBeenCalled();
+
+    // @ts-ignore
+    processSearch(queryBuilder, metadata, undefined as string, alias);
+
+    expect(queryBuilder.andWhere).not.toHaveBeenCalled();
+  });
+
+  test('должен правильно обрабатывать $search с пробелами', () => {
+    const metadata = createMockMetadata([{ propertyName: 'title', type: 'varchar' }]);
+    const $search = '  hello world  ';
+
+    processSearch(queryBuilder, metadata, $search, alias);
+
+    const [, params]: WhereResult = (queryBuilder.andWhere as jest.Mock).mock.calls[0];
+
+    expect(params.textSearchValue).toBe('%hello world%');
+  });
+
+  test('должен обрабатывать $search, начинающийся с числа, как строку, если есть текстовые колонки', () => {
+    const metadata = createMockMetadata([
+      { propertyName: 'code', type: 'varchar' },
+      { propertyName: 'age', type: 'integer' },
+    ]);
+    const $search = '123abc';
+
+    processSearch(queryBuilder, metadata, $search, alias);
+
+    const [, params]: WhereResult = (queryBuilder.andWhere as jest.Mock).mock.calls[0];
+
+    expect(params).toEqual({ textSearchValue: '%123abc%' });
+    expect(params).not.toHaveProperty('numberSearchValue');
   });
 });

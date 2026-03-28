@@ -1,11 +1,36 @@
-export const mapToObject = (aMap: Map<string, unknown>): Record<string, unknown> => {
-  const obj: Record<string, unknown> = {};
-
-  if (aMap) {
-    aMap.forEach((v, k) => {
-      obj[k] = v;
-    });
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-constraint */
+/**
+ * Преобразует Map в обычный объект.
+ * @param map - исходный Map (может быть null или undefined)
+ * @param deep - если true, рекурсивно преобразует вложенные Map в объекты (по умолчанию false)
+ * @returns объект, представляющий исходный Map, или пустой объект, если map пуст/не определён
+ */
+export function mapToObject<TKey extends string | number | symbol, TValue extends any>(
+  map: Map<TKey, TValue> | null | undefined,
+  deep: boolean = false
+): Record<TKey, TValue> {
+  if (!map) {
+    return {} as Record<TKey, TValue>;
   }
 
-  return obj;
-};
+  if (!deep) {
+    return Object.fromEntries(map) as Record<TKey, TValue>;
+  }
+
+  const result: Record<TKey, TValue> = {} as Record<TKey, TValue>;
+
+  for (const [key, value] of map) {
+    // @ts-ignore
+    result[key as any] = isMap(value) ? mapToObject(value as any, deep) : value;
+  }
+
+  return result;
+}
+
+/**
+ * Проверяет, является ли значение экземпляром Map.
+ */
+function isMap(value: unknown): value is Map<unknown, unknown> {
+  return value instanceof Map;
+}
