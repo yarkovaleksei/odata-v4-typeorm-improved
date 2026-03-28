@@ -200,7 +200,7 @@ app.get("/api/Users", (req: Request, res: Response) => {
 });
 ```
 
-Advanced TypeScript example available [here](https://raw.githubusercontent.com/yarkovaleksei/odata-v4-typeorm-improved/refs/heads/master/src/example/sql.ts).
+Advanced TypeScript example available [here](https://raw.githubusercontent.com/yarkovaleksei/odata-v4-typeorm/refs/heads/master/src/example/sql.ts).
 
 ## Usage ES5
 ```javascript
