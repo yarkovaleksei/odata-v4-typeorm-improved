@@ -2,8 +2,8 @@ import { filter } from 'odata-v4-parser';
 import type { Token } from 'odata-v4-parser/lib/lexer';
 import { SQLLang } from 'odata-v4-sql';
 
-import { TypeOrmVisitor } from './TypeOrmVisitor';
-import type { SqlOptions } from './types';
+import { TypeOrmVisitor } from '../TypeOrmVisitor';
+import type { SqlOptions } from '../types';
 
 /**
  * Creates an SQL WHERE clause from an OData filter expression string
