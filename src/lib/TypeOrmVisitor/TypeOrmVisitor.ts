@@ -16,11 +16,7 @@ export class TypeOrmVisitor extends Visitor {
   public alias = '';
 
   // All other ones are sorted at the front
-  private queryOptionsSort = [
-    TokenType.Expand,
-    TokenType.Filter,
-    TokenType.Select,
-  ];
+  private queryOptionsSort = [TokenType.Expand, TokenType.Filter, TokenType.Select];
 
   constructor(options: SqlOptions) {
     super(options);
@@ -51,8 +47,7 @@ export class TypeOrmVisitor extends Visitor {
     node.value.options
       .sort(
         (a: Token, b: Token) =>
-          this.queryOptionsSort.indexOf(a.type) -
-          this.queryOptionsSort.indexOf(b.type),
+          this.queryOptionsSort.indexOf(a.type) - this.queryOptionsSort.indexOf(b.type)
       )
       .forEach((option: Token) => this.Visit(option, context));
   }
@@ -60,9 +55,7 @@ export class TypeOrmVisitor extends Visitor {
   protected VisitExpand(node: Token) {
     node.value.items.forEach((item: Token) => {
       const expandPath = `${item.value.path.raw}${item.position}`;
-      let visitor = this.includes.filter(
-        (v) => v.navigationProperty == expandPath,
-      )[0];
+      let visitor = this.includes.filter((v) => v.navigationProperty == expandPath)[0];
 
       if (!visitor) {
         visitor = new TypeOrmVisitor({ ...this.options, alias: expandPath });
@@ -110,9 +103,7 @@ export class TypeOrmVisitor extends Visitor {
       // if we're in a filtering context and get to this point, we're dealing with a `relation/member`
       // We need to ensure that this relation is loaded into a Visitor
       const expandPath = node.value.current.value.name;
-      let visitor = this.includes.filter(
-        (v) => v.navigationProperty == expandPath,
-      )[0];
+      let visitor = this.includes.filter((v) => v.navigationProperty == expandPath)[0];
 
       if (!visitor) {
         visitor = new TypeOrmVisitor({ ...this.options, alias: expandPath });
@@ -170,7 +161,7 @@ export class TypeOrmVisitor extends Visitor {
       // @ts-ignore
       this[context.target] = this[context.target].replace(
         new RegExp(`${this.alias}.${context.identifier}`, 'g'),
-        context.identifier,
+        context.identifier
       );
     }
 
@@ -187,17 +178,11 @@ export class TypeOrmVisitor extends Visitor {
     if (this.options.useParameters && context.literal == null) {
       this.where = this.where
         .replace(/= :p\d*$/, 'IS NULL')
-        .replace(
-          new RegExp(`\\:p\\d* = ${context.identifier}$`),
-          `${context.identifier} IS NULL`,
-        );
+        .replace(new RegExp(`\\:p\\d* = ${context.identifier}$`), `${context.identifier} IS NULL`);
     } else if (context.literal == 'NULL') {
       this.where = this.where
         .replace(/= NULL$/, 'IS NULL')
-        .replace(
-          new RegExp(`NULL = ${context.identifier}$`),
-          `${context.identifier} IS NULL`,
-        );
+        .replace(new RegExp(`NULL = ${context.identifier}$`), `${context.identifier} IS NULL`);
     }
   }
 
@@ -213,15 +198,12 @@ export class TypeOrmVisitor extends Visitor {
         .replace(/<> :p\d*$/, 'IS NOT NULL')
         .replace(
           new RegExp(`\\:p\\d* <> ${context.identifier}$`),
-          `${context.identifier} IS NOT NULL`,
+          `${context.identifier} IS NOT NULL`
         );
     } else if (context.literal == 'NULL') {
       this.where = this.where
         .replace(/<> NULL$/, 'IS NOT NULL')
-        .replace(
-          new RegExp(`NULL <> ${context.identifier}$`),
-          `${context.identifier} IS NOT NULL`,
-        );
+        .replace(new RegExp(`NULL <> ${context.identifier}$`), `${context.identifier} IS NOT NULL`);
     }
   }
 
@@ -237,8 +219,7 @@ export class TypeOrmVisitor extends Visitor {
       }
 
       this.where += `:${name}`;
-    } else
-      this.where += context.literal = SQLLiteral.convert(node.value, node.raw);
+    } else this.where += context.literal = SQLLiteral.convert(node.value, node.raw);
   }
 
   protected VisitMethodCallExpression(node: Token, context: Context) {

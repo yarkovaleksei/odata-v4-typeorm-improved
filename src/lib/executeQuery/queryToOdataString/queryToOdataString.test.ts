@@ -66,7 +66,7 @@ describe('queryToOdataString', () => {
     const result = queryToOdataString(query);
 
     expect(result).toBe(
-      '$search=hello%20world&$filter=price%20gt%20100&$expand=products($select=id,name)',
+      '$search=hello%20world&$filter=price%20gt%20100&$expand=products($select=id,name)'
     );
   });
 

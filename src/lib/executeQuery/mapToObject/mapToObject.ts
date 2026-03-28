@@ -1,6 +1,4 @@
-export const mapToObject = (
-  aMap: Map<string, unknown>,
-): Record<string, unknown> => {
+export const mapToObject = (aMap: Map<string, unknown>): Record<string, unknown> => {
   const obj: Record<string, unknown> = {};
 
   if (aMap) {

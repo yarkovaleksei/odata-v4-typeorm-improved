@@ -25,11 +25,7 @@ describe('executeQuery', () => {
 
   describe('executeQuery -> $search', () => {
     it('вернёт 1 запись', async () => {
-      const users = await executeQuery(
-        userRepository,
-        { $search: 'bob' },
-        { alias },
-      );
+      const users = await executeQuery(userRepository, { $search: 'bob' }, { alias });
       const bobRow = await userRepository.findOne({ where: { name: 'Bob' } });
 
       expect(users).toHaveProperty('items');

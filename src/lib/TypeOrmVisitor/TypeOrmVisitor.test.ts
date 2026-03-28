@@ -7,7 +7,7 @@ describe('TypeOrmVisitor', () => {
   function processQuery(
     odataQuery: string,
     options: Partial<SqlOptions> = {},
-    table = 'users',
+    table = 'users'
   ): { sql: string; parameters: Map<string, unknown> } {
     const ast = query(odataQuery);
     const visitor = new TypeOrmVisitor({
@@ -58,9 +58,7 @@ describe('TypeOrmVisitor', () => {
     });
 
     it('should handle AND/OR', () => {
-      const { sql, parameters } = processQuery(
-        "$filter=name eq 'John' and age gt 18",
-      );
+      const { sql, parameters } = processQuery("$filter=name eq 'John' and age gt 18");
 
       expect(sql).toContain('WHERE u.name = :p0 AND u.age > :p1');
       expect(parameters.get('p0')).toBe('John');
@@ -75,9 +73,7 @@ describe('TypeOrmVisitor', () => {
     });
 
     it('should handle deep nested paths', () => {
-      const { sql, parameters } = processQuery(
-        "$filter=profile/address/city eq 'Moscow'",
-      );
+      const { sql, parameters } = processQuery("$filter=profile/address/city eq 'Moscow'");
 
       expect(sql).toContain('WHERE profile.address.city = :p0');
       expect(parameters.get('p0')).toBe('Moscow');
@@ -138,39 +134,27 @@ describe('TypeOrmVisitor', () => {
   describe('OData functions', () => {
     describe('contains', () => {
       it('should generate LIKE with parameters', () => {
-        const { sql, parameters } = processQuery(
-          "$filter=contains(name, 'John')",
-        );
+        const { sql, parameters } = processQuery("$filter=contains(name, 'John')");
 
-        expect(sql).toContain(
-          'SELECT * FROM users WHERE u.name like ? ORDER BY 1',
-        );
+        expect(sql).toContain('SELECT * FROM users WHERE u.name like ? ORDER BY 1');
         expect(parameters.get('p0')).toBe('%John%');
       });
     });
 
     describe('startswith', () => {
       it('should generate LIKE with suffix %', () => {
-        const { sql, parameters } = processQuery(
-          "$filter=startswith(name, 'Jo')",
-        );
+        const { sql, parameters } = processQuery("$filter=startswith(name, 'Jo')");
 
-        expect(sql).toContain(
-          'SELECT * FROM users WHERE u.name like ? ORDER BY 1',
-        );
+        expect(sql).toContain('SELECT * FROM users WHERE u.name like ? ORDER BY 1');
         expect(parameters.get('p0')).toBe('Jo%');
       });
     });
 
     describe('endswith', () => {
       it('should generate LIKE with prefix %', () => {
-        const { sql, parameters } = processQuery(
-          "$filter=endswith(name, 'hn')",
-        );
+        const { sql, parameters } = processQuery("$filter=endswith(name, 'hn')");
 
-        expect(sql).toContain(
-          'SELECT * FROM users WHERE u.name like ? ORDER BY 1',
-        );
+        expect(sql).toContain('SELECT * FROM users WHERE u.name like ? ORDER BY 1');
         expect(parameters.get('p0')).toBe('%hn');
       });
     });
@@ -256,12 +240,9 @@ describe('TypeOrmVisitor', () => {
 
   describe('Parameters', () => {
     it('should use parameters when useParameters: true', () => {
-      const { sql, parameters } = processQuery(
-        "$filter=name eq 'John' and age gt 18",
-        {
-          useParameters: true,
-        },
-      );
+      const { sql, parameters } = processQuery("$filter=name eq 'John' and age gt 18", {
+        useParameters: true,
+      });
 
       expect(sql).toContain(':p0');
       expect(sql).toContain(':p1');
@@ -270,10 +251,9 @@ describe('TypeOrmVisitor', () => {
     });
 
     it('should inline literals when useParameters: false', () => {
-      const { sql, parameters } = processQuery(
-        "$filter=name eq 'John' and age gt 18",
-        { useParameters: false },
-      );
+      const { sql, parameters } = processQuery("$filter=name eq 'John' and age gt 18", {
+        useParameters: false,
+      });
 
       expect(sql).toContain("u.name = 'John'");
       expect(sql).toContain('u.age > 18');

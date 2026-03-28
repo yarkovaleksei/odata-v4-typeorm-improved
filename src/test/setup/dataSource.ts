@@ -17,9 +17,7 @@ export async function loadSqlFile(filePath: string) {
   const queryRunner = dataSource.createQueryRunner();
 
   try {
-    const statements = sql
-      .split(/;\s*\n/)
-      .filter((stmt) => stmt.trim().length > 0);
+    const statements = sql.split(/;\s*\n/).filter((stmt) => stmt.trim().length > 0);
 
     for (const statement of statements) {
       await queryRunner.query(statement);

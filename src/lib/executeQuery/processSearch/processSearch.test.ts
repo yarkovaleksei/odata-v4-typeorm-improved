@@ -1,8 +1,4 @@
-import type {
-  EntityMetadata,
-  ObjectLiteral,
-  SelectQueryBuilder,
-} from 'typeorm';
+import type { EntityMetadata, ObjectLiteral, SelectQueryBuilder } from 'typeorm';
 
 import { processSearch, searchableTextColumnTypes } from './processSearch';
 
@@ -38,11 +34,11 @@ describe('processSearch', () => {
       expect(queryBuilder.orWhere).toHaveBeenCalledTimes(1);
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
         'LOWER("user"."firstName") LIKE LOWER(:search)',
-        { search: '%john%' },
+        { search: '%john%' }
       );
       expect(queryBuilder.orWhere).toHaveBeenCalledWith(
         'LOWER("user"."lastName") LIKE LOWER(:search)',
-        { search: '%john%' },
+        { search: '%john%' }
       );
     });
 
@@ -57,7 +53,7 @@ describe('processSearch', () => {
 
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
         'LOWER("user"."description") LIKE LOWER(:search)',
-        { search: '%test%' },
+        { search: '%test%' }
       );
     });
 
@@ -76,9 +72,7 @@ describe('processSearch', () => {
     });
 
     it('should handle only one text column', () => {
-      const columns = [
-        { propertyName: 'name', type: 'varchar' },
-      ] as ColumnMetadata[];
+      const columns = [{ propertyName: 'name', type: 'varchar' }] as ColumnMetadata[];
 
       metadata = { columns } as EntityMetadata;
 
@@ -88,14 +82,12 @@ describe('processSearch', () => {
       expect(queryBuilder.orWhere).not.toHaveBeenCalled();
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
         'LOWER("user"."name") LIKE LOWER(:search)',
-        { search: '%john%' },
+        { search: '%john%' }
       );
     });
 
     it('should use the provided alias', () => {
-      const columns = [
-        { propertyName: 'email', type: 'varchar' },
-      ] as ColumnMetadata[];
+      const columns = [{ propertyName: 'email', type: 'varchar' }] as ColumnMetadata[];
 
       metadata = { columns } as EntityMetadata;
 
@@ -105,14 +97,12 @@ describe('processSearch', () => {
 
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
         'LOWER("usr"."email") LIKE LOWER(:search)',
-        expect.any(Object),
+        expect.any(Object)
       );
     });
 
     it('should convert search string to lowercase and wrap with %', () => {
-      const columns = [
-        { propertyName: 'name', type: 'varchar' },
-      ] as ColumnMetadata[];
+      const columns = [{ propertyName: 'name', type: 'varchar' }] as ColumnMetadata[];
 
       metadata = { columns } as EntityMetadata;
 
@@ -124,9 +114,7 @@ describe('processSearch', () => {
     });
 
     it('should handle an empty search string (resulting in %%)', () => {
-      const columns = [
-        { propertyName: 'name', type: 'varchar' },
-      ] as ColumnMetadata[];
+      const columns = [{ propertyName: 'name', type: 'varchar' }] as ColumnMetadata[];
 
       metadata = { columns } as EntityMetadata;
 
@@ -163,9 +151,7 @@ describe('processSearch', () => {
     });
 
     it('should not mutate the original search string', () => {
-      const columns = [
-        { propertyName: 'name', type: 'varchar' },
-      ] as ColumnMetadata[];
+      const columns = [{ propertyName: 'name', type: 'varchar' }] as ColumnMetadata[];
 
       metadata = { columns } as EntityMetadata;
 
@@ -190,33 +176,24 @@ describe('processSearch', () => {
 
         expect(queryBuilder.andWhere).toHaveBeenCalledTimes(1);
         expect(queryBuilder.andWhere).toHaveBeenCalledWith(
-          expect.stringContaining(
-            'LOWER("user"."content") LIKE LOWER(:search)',
-          ),
-          expect.objectContaining({ search: '%test%' }),
+          expect.stringContaining('LOWER("user"."content") LIKE LOWER(:search)'),
+          expect.objectContaining({ search: '%test%' })
         );
-      },
+      }
     );
 
-    it.each(searchableTextColumnTypes)(
-      'should handle type "%s" in uppercase',
-      (type) => {
-        const columns = [
-          { propertyName: 'content', type: type.toUpperCase() },
-        ] as ColumnMetadata[];
+    it.each(searchableTextColumnTypes)('should handle type "%s" in uppercase', (type) => {
+      const columns = [{ propertyName: 'content', type: type.toUpperCase() }] as ColumnMetadata[];
 
-        metadata = { columns } as EntityMetadata;
+      metadata = { columns } as EntityMetadata;
 
-        processSearch(queryBuilder, metadata, 'test', alias);
+      processSearch(queryBuilder, metadata, 'test', alias);
 
-        expect(queryBuilder.andWhere).toHaveBeenCalledTimes(1);
-      },
-    );
+      expect(queryBuilder.andWhere).toHaveBeenCalledTimes(1);
+    });
 
     it('should handle type as function (String)', () => {
-      const columns = [
-        { propertyName: 'content', type: String },
-      ] as ColumnMetadata[];
+      const columns = [{ propertyName: 'content', type: String }] as ColumnMetadata[];
 
       metadata = { columns } as EntityMetadata;
 
@@ -255,9 +232,7 @@ describe('processSearch', () => {
 
     it('should treat custom function type as non-text unless its name matches', () => {
       class CustomType {}
-      const columns = [
-        { propertyName: 'custom', type: CustomType },
-      ] as ColumnMetadata[];
+      const columns = [{ propertyName: 'custom', type: CustomType }] as ColumnMetadata[];
 
       metadata = { columns } as EntityMetadata;
 

@@ -1,8 +1,4 @@
-import type {
-  EntityMetadata,
-  ObjectLiteral,
-  SelectQueryBuilder,
-} from 'typeorm';
+import type { EntityMetadata, ObjectLiteral, SelectQueryBuilder } from 'typeorm';
 
 import type { QueryParams } from '../../types';
 
@@ -36,13 +32,12 @@ export const processSearch = <T extends ObjectLiteral = ObjectLiteral>(
   queryBuilder: SelectQueryBuilder<T>,
   metadata: EntityMetadata,
   $search: Required<QueryParams>['$search'],
-  alias: string,
+  alias: string
 ) => {
   const textColumns = metadata.columns
     // Searching with Like is only possible in text fields.
     .filter((column) => {
-      const type =
-        typeof column.type === 'function' ? column.type.name : column.type;
+      const type = typeof column.type === 'function' ? column.type.name : column.type;
 
       return searchableTextColumnTypes.includes(type?.toLowerCase());
     })

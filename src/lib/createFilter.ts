@@ -12,16 +12,11 @@ import type { SqlOptions } from './types';
  * const filter = createFilter("Size eq 4 and Age gt 18");
  * const sqlQuery = `SELECT * FROM table WHERE ${filter}`;
  */
-export function createFilter(
-  odataFilter: string | Token,
-  options: SqlOptions,
-): TypeOrmVisitor {
+export function createFilter(odataFilter: string | Token, options: SqlOptions): TypeOrmVisitor {
   options.type = SQLLang.Oracle;
 
   const visitor = new TypeOrmVisitor(options);
-  const ast: Token = <Token>(
-    (typeof odataFilter == 'string' ? filter(odataFilter) : odataFilter)
-  );
+  const ast: Token = <Token>(typeof odataFilter == 'string' ? filter(odataFilter) : odataFilter);
   const visit = visitor.Visit(ast);
   const type = visit.asType();
 

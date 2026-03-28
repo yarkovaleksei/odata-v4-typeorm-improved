@@ -9,21 +9,17 @@ import { processSearch } from './processSearch';
 import { queryToOdataString } from './queryToOdataString';
 import type { ExecuteQueryOptions, GetManyResponse } from './types';
 
-export const executeQueryByQueryBuilder = async <
-  T extends ObjectLiteral = ObjectLiteral,
->(
+export const executeQueryByQueryBuilder = async <T extends ObjectLiteral = ObjectLiteral>(
   inputQueryBuilder: SelectQueryBuilder<T>,
   query: QueryParams,
-  options: ExecuteQueryOptions = {},
+  options: ExecuteQueryOptions = {}
 ): Promise<T[] | GetManyResponse<T>> => {
   const { $search, ...parsedQueryWithoutSearch } = parseQueryParams(query);
   const localOptions: Required<ExecuteQueryOptions> = {
     alias: '',
     ...(options ?? {}),
   };
-  const alias =
-    localOptions.alias ||
-    (inputQueryBuilder.expressionMap.mainAlias?.name ?? '');
+  const alias = localOptions.alias || (inputQueryBuilder.expressionMap.mainAlias?.name ?? '');
   const odataString = queryToOdataString(parsedQueryWithoutSearch);
   const odataQuery = createQuery(odataString, { alias });
   const metadata = inputQueryBuilder.connection.getMetadata(alias);
@@ -34,9 +30,7 @@ export const executeQueryByQueryBuilder = async <
   // Unlike the relations which are done via leftJoin[AndSelect](), we must explicitly add root
   // entity fields to the selection if it hasn't been narrowed down by the user.
   if (Object.keys(odataQuery).length === 0 || odataQuery.select === '*') {
-    root_select = metadata.nonVirtualColumns.map(
-      (x) => `${alias}.${x.propertyPath}`,
-    );
+    root_select = metadata.nonVirtualColumns.map((x) => `${alias}.${x.propertyPath}`);
   } else {
     root_select = odataQuery.select.split(',').map((x: string) => x.trim());
   }
@@ -50,9 +44,7 @@ export const executeQueryByQueryBuilder = async <
   queryBuilder = processIncludes<T>(queryBuilder, odataQuery, alias, metadata);
 
   if (odataQuery.orderby && odataQuery.orderby !== '1') {
-    const orders: string[] = odataQuery.orderby
-      .split(',')
-      .map((i: string) => i.trim());
+    const orders: string[] = odataQuery.orderby.split(',').map((i: string) => i.trim());
 
     orders.forEach((orderItem) => {
       const [field, order] = orderItem.split(' ');
