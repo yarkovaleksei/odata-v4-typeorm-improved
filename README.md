@@ -22,7 +22,7 @@ yarn serve
 
 ## Usage as server - TypeScript
 
-Example request:  GET [/api/users?$filter=id eq 1&$select=id,username](http://localhost:3001/api/users?$filter=id%20eq%201&$select=id,username)
+Example request:  GET [/api/users?$search=user&$select=id,username](http://localhost:3001/api/users?$search=user&$select=id,username)
 
 ## NestJS middleware
 
