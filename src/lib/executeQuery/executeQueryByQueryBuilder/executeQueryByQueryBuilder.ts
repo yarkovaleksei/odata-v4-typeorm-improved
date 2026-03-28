@@ -40,19 +40,19 @@ export const executeQueryByQueryBuilder = async <T extends ObjectLiteral = Objec
   const metadata = inputQueryBuilder.connection.getMetadata(alias);
 
   let queryBuilder = inputQueryBuilder;
-  let root_select: string[];
+  let rootSelect: string[];
 
   // Определяем, какие поля корневой сущности выбирать
   if (Object.keys(odataQuery).length === 0 || odataQuery.select === '*') {
     // Если select не указан или равен '*', берём все не виртуальные колонки
-    root_select = metadata.nonVirtualColumns.map((x) => `${alias}.${x.propertyPath}`);
+    rootSelect = metadata.nonVirtualColumns.map((x) => `${alias}.${x.propertyPath}`);
   } else {
     // Иначе используем явно указанные поля (без добавления алиаса, предполагается, что они уже его содержат)
-    root_select = odataQuery.select.split(',').map((x: string) => x.trim());
+    rootSelect = odataQuery.select.split(',').map((x: string) => x.trim());
   }
 
   // Применяем SELECT
-  queryBuilder = queryBuilder.select(root_select);
+  queryBuilder = queryBuilder.select(rootSelect);
 
   // Применяем фильтрацию и параметры
   queryBuilder = queryBuilder
