@@ -1,6 +1,6 @@
 {
   "name": "odata-v4-typeorm-improved",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "OData to TYPEORM query compiler",
   "main": "build/src/lib/index.js",
   "typings": "build/src/lib/index",
