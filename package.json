@@ -10,7 +10,6 @@
   "scripts": {
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
-    "format": "prettier --write ./src/**/*.{ts,json}",
     "test:unit": "jest",
     "build": "rm -rf ./build && tsc --project tsconfig.build.json && rm -rf ./build/src/test",
     "release": "yarn build && npm publish",
@@ -65,7 +64,6 @@
     "lint-staged": "^16.4.0",
     "odata-v4-server": "0.2.13",
     "pg": "^8.20.0",
-    "prettier": "^3.8.1",
     "sqlite3": "^6.0.1",
     "ts-jest": "^29.4.6",
     "typeorm": "^0.3.28",
