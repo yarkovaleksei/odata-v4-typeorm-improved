@@ -14,5 +14,5 @@ export class Post {
   content!: string;
 
   @ManyToOne(() => User, (user) => user.posts)
-  user!: User;
+  user!: User | null;
 }

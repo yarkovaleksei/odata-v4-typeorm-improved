@@ -1,9 +1,11 @@
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import typeormTypescriptRecommended from 'eslint-plugin-typeorm-typescript/recommended';
 
 export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
+  typeormTypescriptRecommended,
   {
     ignores: ['node_modules', 'build', 'examples', '**/*.js'],
   },
@@ -16,10 +18,7 @@ export default tseslint.config(
   },
   {
     rules: {
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        { argsIgnorePattern: '^_' },
-      ],
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/explicit-function-return-type': 'off',
       /**
        * Sometimes you have to be a bit tricky in tests, so I'll disable the rule

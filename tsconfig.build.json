@@ -10,7 +10,7 @@
     "outDir": "build",
     "skipLibCheck": true,
     "rootDir": ".",
-    "types": ["@types/jest", "@types/node"]
+    "types": ["@types/express", "@types/jest", "@types/node"]
   },
   "include": ["src/lib/**/*"],
   "exclude": ["build", "node_modules", "examples", "src/**/*.(test|spec).ts"]
