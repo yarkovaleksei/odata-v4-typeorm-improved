@@ -1,6 +1,6 @@
 {
   "name": "odata-v4-typeorm-improved",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "OData to TYPEORM query compiler",
   "main": "build/src/lib/index.js",
   "typings": "build/src/lib/index",
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yarkovaleksei/odata-v4-typeorm.git"
+    "url": "git+https://github.com/yarkovaleksei/odata-v4-typeorm-improved.git"
   },
   "keywords": [
     "typeorm",
@@ -33,9 +33,9 @@
   "author": "yarkovaleksei",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/yarkovaleksei/odata-v4-typeorm/issues"
+    "url": "https://github.com/yarkovaleksei/odata-v4-typeorm-improved/issues"
   },
-  "homepage": "https://github.com/yarkovaleksei/odata-v4-typeorm#readme",
+  "homepage": "https://github.com/yarkovaleksei/odata-v4-typeorm-improved#readme",
   "dependencies": {
     "odata-v4-parser": "^0.1.29",
     "odata-v4-sql": "^0.1.2"
