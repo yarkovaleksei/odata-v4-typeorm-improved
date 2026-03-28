@@ -1,16 +1,10 @@
 import * as pg from 'pg';
 import * as config from 'config';
 import { createQuery } from '../lib/index';
-import {
-  Edm,
-  odata,
-  ODataController,
-  ODataServer,
-  Stream,
-} from 'odata-v4-server';
+import { Edm, odata, ODataController, ODataServer, Stream } from 'odata-v4-server';
 
-let db: pg.PoolConfig = config.get<pg.PoolConfig>('sqlConfig');
-let pool = new pg.Pool(db);
+const db: pg.PoolConfig = config.get<pg.PoolConfig>('sqlConfig');
+const pool = new pg.Pool(db);
 
 @Edm.OpenType
 class Country {
@@ -56,7 +50,7 @@ class CountriesController extends ODataController {
     return (await pool.connect())
       .query(
         `SELECT ${sqlQuery.select} FROM country WHERE code = $${sqlQuery.parameters.length + 1} AND (${sqlQuery.where})`,
-        sqlQuery.parameters.concat([code]),
+        sqlQuery.parameters.concat([code])
       )
       .then((result) => result.rows[0]);
   }
@@ -65,10 +59,7 @@ class CountriesController extends ODataController {
 @odata.type(City)
 class CitiesController extends ODataController {
   @odata.GET
-  async getCities(
-    @odata.stream stream: typeof Stream,
-    @odata.query query: string,
-  ) {
+  async getCities(@odata.stream stream: typeof Stream, @odata.query query: string) {
     const sqlQuery = createQuery(query, { alias: '' });
     return (await pool.connect())
       .query(sqlQuery.from('country'), sqlQuery.parameters)
@@ -81,7 +72,7 @@ class CitiesController extends ODataController {
     return (await pool.connect())
       .query(
         `SELECT ${sqlQuery.select} FROM country WHERE id = $${sqlQuery.parameters.length + 1} AND (${sqlQuery.where})`,
-        sqlQuery.parameters.concat([id]),
+        sqlQuery.parameters.concat([id])
       )
       .then((result) => result.rows[0]);
   }
@@ -90,10 +81,7 @@ class CitiesController extends ODataController {
 @odata.type(CountryLanguage)
 class CountryLanguagesController extends ODataController {
   @odata.GET
-  async getLanguages(
-    @odata.stream stream: typeof Stream,
-    @odata.query query: string,
-  ) {
+  async getLanguages(@odata.stream stream: typeof Stream, @odata.query query: string) {
     const sqlQuery = createQuery(query, { alias: '' });
     return (await pool.connect())
       .query(sqlQuery.from('countrylanguage'), sqlQuery.parameters)

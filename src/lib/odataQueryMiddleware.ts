@@ -6,7 +6,7 @@ import type { QueryParams } from './types';
 
 interface OdataQuerySettings {
   logger?: {
-    error: (text: string, ...args: any[]) => void;
+    error: (text: string, ...args: unknown[]) => void;
   };
 }
 
@@ -15,7 +15,7 @@ interface OdataQuerySettings {
  */
 export function odataQuery<T extends ObjectLiteral = ObjectLiteral>(
   repositoryOrQueryBuilder: Repository<T> | SelectQueryBuilder<T>,
-  settings: OdataQuerySettings = {},
+  settings: OdataQuerySettings = {}
 ) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -26,7 +26,7 @@ export function odataQuery<T extends ObjectLiteral = ObjectLiteral>(
         req.query as unknown as QueryParams,
         {
           alias,
-        },
+        }
       );
 
       return res.status(200).json(result);

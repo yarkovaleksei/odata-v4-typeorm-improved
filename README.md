@@ -22,7 +22,7 @@ yarn serve
 
 ## Usage as server - TypeScript
 
-Example request:  GET [/api/users?$filter=id eq 1&$select=id,username](http://localhost:3001/api/users?$filter=id%20eq%201&$select=id,username)
+Example request:  GET [/api/users?$search=user&$select=id,username](http://localhost:3001/api/users?$search=user&$select=id,username)
 
 ## NestJS middleware
 
@@ -52,6 +52,7 @@ export class OdataUsersMiddleware implements NestMiddleware {
 
 ```typescript
 import { Connection } from 'typeorm';
+
 import { UserEntity } from '../user.entity';
 
 export const userProviders = [
@@ -67,6 +68,7 @@ export const userProviders = [
 
 ```typescript
 import { createConnection } from 'typeorm';
+
 import { UserEntity } from '../entities/user.entity';
 
 export const databaseProviders = [
@@ -75,12 +77,11 @@ export const databaseProviders = [
     useFactory: async () => await createConnection({
       type: 'postgres',
       host: 'localhost',
-      port: 3306,
+      port: 5432,
       username: 'postgres',
       password: 'root',
       database: 'test',
       synchronize: true,
-      
       entities: [UserEntity]
     }),
   },
@@ -93,8 +94,8 @@ export const databaseProviders = [
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 
 import { databaseProviders } from './db/database.providers';
-import { userProviders } from './providers/user.providers';
 import { OdataUsersMiddleware } from './middlewares/odataUsers.middleware';
+import { userProviders } from './providers/user.providers';
 
 @Module({
   providers: [
@@ -117,6 +118,7 @@ export class AppModule implements NestModule {
 import express from 'express';
 import { odataQuery } from 'odata-v4-typeorm-improved';
 import { getRepository } from 'typeorm';
+
 import { User } from '../entities/user';
 
 const app = express();
@@ -134,6 +136,7 @@ app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 import express from 'express';
 import { executeQuery } from 'odata-v4-typeorm-improved';
 import { getRepository } from 'typeorm';
+
 import { User } from '../entities/user';
 
 const app = express();
@@ -158,6 +161,7 @@ app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 import express from 'express';
 import { executeQuery } from 'odata-v4-typeorm-improved';
 import { getRepository } from 'typeorm';
+
 import { User } from '../entities/user';
 
 const app = express();
@@ -196,7 +200,7 @@ app.get("/api/Users", (req: Request, res: Response) => {
 });
 ```
 
-Advanced TypeScript example available [here](https://raw.githubusercontent.com/jaystack/odata-v4-mysql/master/src/example/sql.ts).
+Advanced TypeScript example available [here](https://raw.githubusercontent.com/yarkovaleksei/odata-v4-typeorm-improved/refs/heads/master/src/example/sql.ts).
 
 ## Usage ES5
 ```javascript

@@ -1,10 +1,11 @@
 import { Literal } from 'odata-v4-literal';
 import { type Token, TokenType } from 'odata-v4-parser/lib/lexer';
 import { SQLLiteral, SQLLang, Visitor } from 'odata-v4-sql/lib/visitor';
+import type { ObjectLiteral } from 'typeorm';
 
-import type { SqlOptions } from './types';
+import type { SqlOptions } from '../types';
 
-interface Context extends Record<string, any> {
+interface Context extends ObjectLiteral {
   target: string;
   identifier: string | Context;
   literal?: string;
@@ -15,11 +16,7 @@ export class TypeOrmVisitor extends Visitor {
   public alias = '';
 
   // All other ones are sorted at the front
-  private queryOptionsSort = [
-    TokenType.Expand,
-    TokenType.Filter,
-    TokenType.Select,
-  ];
+  private queryOptionsSort = [TokenType.Expand, TokenType.Filter, TokenType.Select];
 
   constructor(options: SqlOptions) {
     super(options);
@@ -50,18 +47,15 @@ export class TypeOrmVisitor extends Visitor {
     node.value.options
       .sort(
         (a: Token, b: Token) =>
-          this.queryOptionsSort.indexOf(a.type) -
-          this.queryOptionsSort.indexOf(b.type),
+          this.queryOptionsSort.indexOf(a.type) - this.queryOptionsSort.indexOf(b.type)
       )
       .forEach((option: Token) => this.Visit(option, context));
   }
 
-  protected VisitExpand(node: Token, context: Context) {
+  protected VisitExpand(node: Token) {
     node.value.items.forEach((item: Token) => {
-      let expandPath = `${item.value.path.raw}${item.position}`;
-      let visitor = this.includes.filter(
-        (v) => v.navigationProperty == expandPath,
-      )[0];
+      const expandPath = `${item.value.path.raw}${item.position}`;
+      let visitor = this.includes.filter((v) => v.navigationProperty == expandPath)[0];
 
       if (!visitor) {
         visitor = new TypeOrmVisitor({ ...this.options, alias: expandPath });
@@ -97,7 +91,7 @@ export class TypeOrmVisitor extends Visitor {
       return;
     }
 
-    let item = node.raw.replace(/\//g, '.');
+    const item = node.raw.replace(/\//g, '.');
 
     this.select +=
       (this.select && !this.select.trim().endsWith(',') ? ',' : '') +
@@ -108,10 +102,8 @@ export class TypeOrmVisitor extends Visitor {
     if (context.target === 'where' && node.value.current) {
       // if we're in a filtering context and get to this point, we're dealing with a `relation/member`
       // We need to ensure that this relation is loaded into a Visitor
-      let expandPath = node.value.current.value.name;
-      let visitor = this.includes.filter(
-        (v) => v.navigationProperty == expandPath,
-      )[0];
+      const expandPath = node.value.current.value.name;
+      let visitor = this.includes.filter((v) => v.navigationProperty == expandPath)[0];
 
       if (!visitor) {
         visitor = new TypeOrmVisitor({ ...this.options, alias: expandPath });
@@ -169,7 +161,7 @@ export class TypeOrmVisitor extends Visitor {
       // @ts-ignore
       this[context.target] = this[context.target].replace(
         new RegExp(`${this.alias}.${context.identifier}`, 'g'),
-        context.identifier,
+        context.identifier
       );
     }
 
@@ -186,17 +178,11 @@ export class TypeOrmVisitor extends Visitor {
     if (this.options.useParameters && context.literal == null) {
       this.where = this.where
         .replace(/= :p\d*$/, 'IS NULL')
-        .replace(
-          new RegExp(`\\:p\\d* = ${context.identifier}$`),
-          `${context.identifier} IS NULL`,
-        );
+        .replace(new RegExp(`\\:p\\d* = ${context.identifier}$`), `${context.identifier} IS NULL`);
     } else if (context.literal == 'NULL') {
       this.where = this.where
         .replace(/= NULL$/, 'IS NULL')
-        .replace(
-          new RegExp(`NULL = ${context.identifier}$`),
-          `${context.identifier} IS NULL`,
-        );
+        .replace(new RegExp(`NULL = ${context.identifier}$`), `${context.identifier} IS NULL`);
     }
   }
 
@@ -212,22 +198,19 @@ export class TypeOrmVisitor extends Visitor {
         .replace(/<> :p\d*$/, 'IS NOT NULL')
         .replace(
           new RegExp(`\\:p\\d* <> ${context.identifier}$`),
-          `${context.identifier} IS NOT NULL`,
+          `${context.identifier} IS NOT NULL`
         );
     } else if (context.literal == 'NULL') {
       this.where = this.where
         .replace(/<> NULL$/, 'IS NOT NULL')
-        .replace(
-          new RegExp(`NULL <> ${context.identifier}$`),
-          `${context.identifier} IS NOT NULL`,
-        );
+        .replace(new RegExp(`NULL <> ${context.identifier}$`), `${context.identifier} IS NOT NULL`);
     }
   }
 
   protected VisitLiteral(node: Token, context: Context) {
     if (this.options.useParameters) {
-      let name = `p${this.parameterSeed++}`;
-      let value = Literal.convert(node.value, node.raw);
+      const name = `p${this.parameterSeed++}`;
+      const value = Literal.convert(node.value, node.raw);
 
       context.literal = value;
 
@@ -236,21 +219,21 @@ export class TypeOrmVisitor extends Visitor {
       }
 
       this.where += `:${name}`;
-    } else
-      this.where += context.literal = SQLLiteral.convert(node.value, node.raw);
+    } else this.where += context.literal = SQLLiteral.convert(node.value, node.raw);
   }
 
   protected VisitMethodCallExpression(node: Token, context: Context) {
-    var method = node.value.method;
-    var params = node.value.parameters || [];
+    const method = node.value.method;
+    const params = node.value.parameters || [];
+    let indexofFn: string;
 
     switch (method) {
       case 'contains':
         this.Visit(params[0], context);
 
         if (this.options.useParameters) {
-          let name = `p${this.parameterSeed++}`;
-          let value = Literal.convert(params[1].value, params[1].raw);
+          const name = `p${this.parameterSeed++}`;
+          const value = Literal.convert(params[1].value, params[1].raw);
 
           this.parameters.set(name, `%${value}%`);
           this.where += ' like ?';
@@ -261,8 +244,8 @@ export class TypeOrmVisitor extends Visitor {
         this.Visit(params[0], context);
 
         if (this.options.useParameters) {
-          let name = `p${this.parameterSeed++}`;
-          let value = Literal.convert(params[1].value, params[1].raw);
+          const name = `p${this.parameterSeed++}`;
+          const value = Literal.convert(params[1].value, params[1].raw);
 
           this.parameters.set(name, `%${value}`);
           this.where += ' like ?';
@@ -273,8 +256,8 @@ export class TypeOrmVisitor extends Visitor {
         this.Visit(params[0], context);
 
         if (this.options.useParameters) {
-          let name = `p${this.parameterSeed++}`;
-          let value = Literal.convert(params[1].value, params[1].raw);
+          const name = `p${this.parameterSeed++}`;
+          const value = Literal.convert(params[1].value, params[1].raw);
 
           this.parameters.set(name, `${value}%`);
           this.where += ' like ?';
@@ -282,28 +265,26 @@ export class TypeOrmVisitor extends Visitor {
           this.where += ` like '${SQLLiteral.convert(params[1].value, params[1].raw).slice(1, -1)}%'`;
         break;
       case 'indexof':
-        let fn = '';
-
         switch (this.type) {
           case SQLLang.MsSql:
-            fn = 'CHARINDEX';
+            indexofFn = 'CHARINDEX';
             break;
           case SQLLang.ANSI:
           case SQLLang.MySql:
           case SQLLang.PostgreSql:
           default:
-            fn = 'INSTR';
+            indexofFn = 'INSTR';
             break;
         }
 
-        if (fn === 'CHARINDEX') {
+        if (indexofFn === 'CHARINDEX') {
           const tmp = params[0];
 
           params[0] = params[1];
           params[1] = tmp;
         }
 
-        this.where += `${fn}(`;
+        this.where += `${indexofFn}(`;
         this.Visit(params[0], context);
         this.where += ', ';
         this.Visit(params[1], context);
